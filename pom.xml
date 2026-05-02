@@ -47,6 +47,14 @@
             <version>4.1.1</version>
         </dependency>
 
+        <!-- Source: https://mvnrepository.com/artifact/com.crealytics/spark-excel -->
+        <dependency>
+            <groupId>com.crealytics</groupId>
+            <artifactId>spark-excel_2.13</artifactId>
+            <version>3.5.1_0.20.4</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- Source: https://mvnrepository.com/artifact/org.springframework/spring-jdbc -->
         <dependency>
             <groupId>org.springframework</groupId>
