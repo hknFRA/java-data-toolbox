@@ -1,21 +1,26 @@
 package spark;
 
+import infrastructure.spark.SparkCore;
+import org.apache.spark.sql.SparkSession;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class SparkPgTest {
 
+    private static final Logger log = LoggerFactory.getLogger(SparkPgTest.class);
+
     @Test
-    void test() {
-        // given
-        int a = 12;
-        int b = 23;
+    void test_get_unit_test_spark_session() {
+        log.info("hakan");
 
         // when
-        int c = a + b;
+        SparkSession sparkSession = SparkCore.getUnitTestSparkSession();
 
         // then
-        Assertions.assertThat(c).isEqualTo(35);
+        String version = sparkSession.version();
+        Assertions.assertThat(version).isNotNull();
     }
 
 }
