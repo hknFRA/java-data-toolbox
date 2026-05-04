@@ -1,5 +1,7 @@
 package infrastructure;
 
+import org.postgresql.ds.PGSimpleDataSource;
+
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
@@ -14,7 +16,8 @@ public class JdbcCore {
             try {
                 String url = dataSource.getConnection().getMetaData().getURL();
                 String id = dataSource.getConnection().getMetaData().getUserName();
-                return new JdbcSecrets(url, id, "");
+                String pass = ((PGSimpleDataSource) dataSource).getPassword();
+                return new JdbcSecrets(url, id, pass);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
