@@ -81,6 +81,25 @@ public class SparkPg {
      *
      */
     public static Info readSql(SparkSession sparkSession, String url, String user, String pass, String sql) {
-        return new Info(null, 0L);
+
+        long start = System.currentTimeMillis();
+        log.info("start read spark jdbc. url : {} , user : {}, sql : {}",
+                url, user, sql);
+
+        Dataset<Row> df = sparkSession.read()
+                .format("jdbc")
+                // spark
+                .option("url", url)
+                .option("user", user)
+                .option("password", pass)
+                .option("driver", PgCore.ORG_POSTGRESQL_DRIVER)
+                .option("query", sql)
+                // jdbc
+                .option("ApplicationName", "spark-java-reader")
+                .load();
+        df.printSchema();
+
+        long end = System.currentTimeMillis() - start;
+        return new Info(df, end);
     }
 }

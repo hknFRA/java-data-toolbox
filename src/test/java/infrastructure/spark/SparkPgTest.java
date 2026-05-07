@@ -44,20 +44,42 @@ class SparkPgTest {
         Dataset<Row> df = sparkSession.read().option("header", true).csv("src/test/resources/samples/s1.csv");
 
         // when
-        SparkPg.write(df, url, id, pass, schema, table, SaveMode.Append, 100);
+        SparkPg.write(df, url, id, pass, schema, table, SaveMode.Overwrite, 100);
 
         // result
         Dataset<Row> dfResult = SparkPg.readTable(sparkSession, url, id, pass, schema, table).df();
         Map<String, @Nullable Object> count = namedParameterJdbcTemplate.getJdbcTemplate().queryForMap("select count(*) as c_ from %s.%s".formatted(schema, table));
-        long sum = dfResult.selectExpr("sum(population) as s_")
+        // spark sql cast fix error of type java.lang.ClassCastException: class java.lang.Double cannot be cast to class java.lang.Long
+        Object sum = dfResult.selectExpr("cast(sum(population) as long) as s_")
                 .collectAsList()
                 .getFirst()
-                .getLong(0);
+                .get(0);
 
         // then
         Assertions.assertThat(count.get("c_")).isEqualTo(3L);
         Assertions.assertThat(dfResult.count()).isEqualTo(3L);
         Assertions.assertThat(sum).isEqualTo(330000L);
+    }
+
+    @Test
+    void test_given_csv_should_be_write_to_db_and_query_sql() {
+        // given
+        String schema = "public";
+        String table = "table_countries";
+        Dataset<Row> df = sparkSession.read().option("header", true).csv("src/test/resources/samples/s1.csv");
+
+        // when
+        SparkPg.write(df, url, id, pass, schema, table, SaveMode.Overwrite, 100);
+
+        // result
+        //1
+        Dataset<Row> dfResult = SparkPg.readTable(sparkSession, url, id, pass, schema, table).df();
+        // 2
+        String sql = "select * from %s.%s".formatted(schema, table);
+        Dataset<Row> dfResultSql = SparkPg.readSql(sparkSession, url, id, pass, sql).df();
+
+        // then
+        javaDatasetSuiteBase.assertDatasetEquals(dfResult, dfResultSql);
     }
 
 }
