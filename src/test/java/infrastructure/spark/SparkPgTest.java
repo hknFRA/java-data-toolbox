@@ -1,5 +1,6 @@
 package infrastructure.spark;
 
+import com.holdenkarau.spark.testing.JavaDatasetSuiteBase;
 import infrastructure.JdbcCore;
 import io.zonky.test.db.postgres.embedded.FlywayPreparer;
 import io.zonky.test.db.postgres.junit5.EmbeddedPostgresExtension;
@@ -21,9 +22,11 @@ class SparkPgTest {
     JdbcCore.JdbcSecrets secrets = JdbcCore.JdbcSecrets.getJdbcSecrets(db.getTestDatabase());
     String url = secrets.url();
     String id = secrets.id();
-    String pass = secrets.pass();
+    String pass = "";
 
     SparkSession sparkSession = SparkCore.getUnitTestSparkSession();
+
+    JavaDatasetSuiteBase javaDatasetSuiteBase = new JavaDatasetSuiteBase();
 
     @Test
     void test_given_csv_should_be_write_to_db() {
@@ -32,10 +35,10 @@ class SparkPgTest {
 
         // when
         SparkPg.write(df, url, id, pass, "public", "table_countries", SaveMode.Overwrite, 100);
-        SparkPg.readTable(sparkSession, url, id, pass, "public", "table_countries");
+        Dataset<Row> dfResult = SparkPg.readTable(sparkSession, url, id, pass, "public", "table_countries").df();
 
         // then
-        System.out.println();
+        javaDatasetSuiteBase.assertDatasetEquals(df, dfResult);
     }
 
 }

@@ -5,6 +5,7 @@ out/
 .kotlin
 .idea
 java-data-toolbox.iml
+/target
 
 ### Eclipse ###
 .apt_generated
