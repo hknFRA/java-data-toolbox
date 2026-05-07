@@ -1,6 +1,6 @@
 package infrastructure.spark;
 
-import org.apache.logging.log4j.util.Strings;
+import infrastructure.postgres.PgCore;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
@@ -12,8 +12,6 @@ public class SparkPg {
 
 
     private static final Logger log = LoggerFactory.getLogger(SparkPg.class);
-
-    private static final String ORG_POSTGRESQL_DRIVER = "org.postgresql.Driver";
 
     public record Info(
             Dataset<Row> df,
@@ -36,7 +34,7 @@ public class SparkPg {
                 .option("url", url)
                 .option("user", user)
                 .option("password", pass)
-                .option("driver", ORG_POSTGRESQL_DRIVER)
+                .option("driver", PgCore.ORG_POSTGRESQL_DRIVER)
                 .option("dbtable", tableFinal)
                 .option("batchsize", batchSize)
 
@@ -67,7 +65,7 @@ public class SparkPg {
                 .option("url", url)
                 .option("user", user)
                 .option("password", pass)
-                .option("driver", ORG_POSTGRESQL_DRIVER)
+                .option("driver", PgCore.ORG_POSTGRESQL_DRIVER)
                 .option("dbtable", tableFinal)
                 // jdbc
                 .option("ApplicationName", "spark-java-reader")
