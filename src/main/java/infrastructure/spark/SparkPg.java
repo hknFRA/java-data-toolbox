@@ -43,7 +43,8 @@ public class SparkPg {
                 .option("ApplicationName", "spark-java-writer")
                 .option("stringtype", "unspecified")
                 .option("reWriteBatchedInserts", true)
-                .mode(saveMode);
+                .mode(saveMode)
+                .save();
     }
 
 
