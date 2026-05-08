@@ -17,8 +17,10 @@ public class SparkPg {
 
     public record Info(
             Dataset<Row> df,
-            long timeMs
-    ) {
+            long timeMs,
+            String schema,
+            String table,
+            String sql) {
     }
 
     /**
@@ -94,7 +96,7 @@ public class SparkPg {
         df.printSchema();
 
         long end = System.currentTimeMillis() - start;
-        return new Info(df, end);
+        return new Info(df, end, schema, table, null);
     }
 
     /**
@@ -120,6 +122,6 @@ public class SparkPg {
         df.printSchema();
 
         long end = System.currentTimeMillis() - start;
-        return new Info(df, end);
+        return new Info(df, end, null, null, sql);
     }
 }

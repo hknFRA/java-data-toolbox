@@ -48,7 +48,8 @@ class SparkPgTest {
         SparkPg.write(df, url, id, pass, schema, table, SaveMode.Overwrite, 100);
 
         // result
-        Dataset<Row> dfResult = SparkPg.readTable(sparkSession, url, id, pass, schema, table).df();
+        SparkPg.Info info = SparkPg.readTable(sparkSession, url, id, pass, schema, table);
+        Dataset<Row> dfResult = info.df();
         Map<String, @Nullable Object> count = namedParameterJdbcTemplate.getJdbcTemplate().queryForMap("select count(*) as c_ from %s.%s".formatted(schema, table));
         // spark sql cast fix error of type java.lang.ClassCastException: class java.lang.Double cannot be cast to class java.lang.Long
         Object sum = dfResult.selectExpr("cast(sum(population) as long) as s_")
@@ -60,6 +61,9 @@ class SparkPgTest {
         Assertions.assertThat(count.get("c_")).isEqualTo(3L);
         Assertions.assertThat(dfResult.count()).isEqualTo(3L);
         Assertions.assertThat(sum).isEqualTo(330000L);
+        Assertions.assertThat(info.schema()).isEqualTo(schema);
+        Assertions.assertThat(info.table()).isEqualTo(table);
+        Assertions.assertThat(info.timeMs()).isGreaterThan(0L);
     }
 
     @Test
