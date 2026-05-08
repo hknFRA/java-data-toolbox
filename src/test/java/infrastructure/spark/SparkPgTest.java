@@ -63,7 +63,8 @@ class SparkPgTest {
         Assertions.assertThat(sum).isEqualTo(330000L);
         Assertions.assertThat(info.schema()).isEqualTo(schema);
         Assertions.assertThat(info.table()).isEqualTo(table);
-        Assertions.assertThat(info.timeMs()).isGreaterThan(0L);
+        Assertions.assertThat(info.durationTimeMs()).isGreaterThan(0L);
+        Assertions.assertThat(info.triggerTimeMs()).isGreaterThan(System.currentTimeMillis());
     }
 
     @Test

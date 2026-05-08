@@ -17,10 +17,11 @@ public class SparkPg {
 
     public record Info(
             Dataset<Row> df,
-            long timeMs,
             String schema,
             String table,
-            String sql) {
+            String sql,
+            long durationTimeMs,
+            long triggerTimeMs) {
     }
 
     /**
@@ -95,8 +96,8 @@ public class SparkPg {
                 .load();
         df.printSchema();
 
-        long end = System.currentTimeMillis() - start;
-        return new Info(df, end, schema, table, null);
+        long time = System.currentTimeMillis() - start;
+        return new Info(df, schema, table, null, time, start);
     }
 
     /**
@@ -121,7 +122,7 @@ public class SparkPg {
                 .load();
         df.printSchema();
 
-        long end = System.currentTimeMillis() - start;
-        return new Info(df, end, null, null, sql);
+        long time = System.currentTimeMillis() - start;
+        return new Info(df, null, null, sql, time, start);
     }
 }
