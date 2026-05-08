@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.Map;
+import java.util.Properties;
 
 class SparkPgTest {
 
@@ -45,6 +46,43 @@ class SparkPgTest {
 
         // when
         SparkPg.write(df, url, id, pass, schema, table, SaveMode.Overwrite, 100);
+
+        // result
+        Dataset<Row> dfResult = SparkPg.readTable(sparkSession, url, id, pass, schema, table).df();
+        Map<String, @Nullable Object> count = namedParameterJdbcTemplate.getJdbcTemplate().queryForMap("select count(*) as c_ from %s.%s".formatted(schema, table));
+        // spark sql cast fix error of type java.lang.ClassCastException: class java.lang.Double cannot be cast to class java.lang.Long
+        Object sum = dfResult.selectExpr("cast(sum(population) as long) as s_")
+                .collectAsList()
+                .getFirst()
+                .get(0);
+
+        // then
+        Assertions.assertThat(count.get("c_")).isEqualTo(3L);
+        Assertions.assertThat(dfResult.count()).isEqualTo(3L);
+        Assertions.assertThat(sum).isEqualTo(330000L);
+    }
+
+    @Test
+    void test_given_csv_should_be_write_to_db_with_props() {
+        // given
+        String schema = "public";
+        String table = "table_countries";
+        Dataset<Row> df = sparkSession.read().option("header", true).csv("src/test/resources/samples/s1.csv");
+        Properties sparkProps = new Properties();
+        sparkProps.put("url", url);
+        sparkProps.put("user", id);
+        sparkProps.put("password", pass);
+        //sparkProps.put("driver", PgCore.ORG_POSTGRESQL_DRIVER);
+        //sparkProps.put("dbtable", "public.table_countries");
+        //sparkProps.put("batchsize", "1000");
+        //sparkProps.put("ApplicationName", "spark-java-writer");
+        //sparkProps.put("stringtype", "unspecified");
+        //sparkProps.put("reWriteBatchedInserts", true);
+
+        Properties pgProps = new Properties();
+
+        // when
+        SparkPg.write(df, schema, table, sparkProps, pgProps, SaveMode.Overwrite);
 
         // result
         Dataset<Row> dfResult = SparkPg.readTable(sparkSession, url, id, pass, schema, table).df();

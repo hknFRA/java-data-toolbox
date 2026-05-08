@@ -8,6 +8,8 @@ import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Properties;
+
 public class SparkPg {
 
 
@@ -45,6 +47,24 @@ public class SparkPg {
                 .option("reWriteBatchedInserts", true)
                 .mode(saveMode)
                 .save();
+    }
+
+    /**
+     *
+     */
+    public static void write(Dataset<Row> dataset, String schema, String table,
+                             Properties sparkProps, Properties pgProps, SaveMode saveMode) {
+
+        String url = sparkProps.getProperty("url");
+        String tableFinal = schema == null || schema.isEmpty() ?
+                table : String.join(".", schema, table);
+        //Properties props = new Properties(sparkProps);
+
+        dataset.write()
+                .mode(saveMode)
+                .jdbc(url, tableFinal, sparkProps)
+        ;
+
     }
 
 
