@@ -54,17 +54,17 @@ public class SparkPg {
      */
     public static void write(Dataset<Row> dataset, String schema, String table,
                              Properties sparkProps, Properties pgProps, SaveMode saveMode) {
+        // todo : check if spark props are OK
+        // todo : check if jdbc props are OK
+        // todo : convert all props values to string (cast error)
 
         String url = sparkProps.getProperty("url");
         String tableFinal = schema == null || schema.isEmpty() ?
                 table : String.join(".", schema, table);
-        //Properties props = new Properties(sparkProps);
 
         dataset.write()
                 .mode(saveMode)
-                .jdbc(url, tableFinal, sparkProps)
-        ;
-
+                .jdbc(url, tableFinal, sparkProps);
     }
 
 

@@ -72,12 +72,11 @@ class SparkPgTest {
         sparkProps.put("url", url);
         sparkProps.put("user", id);
         sparkProps.put("password", pass);
-        //sparkProps.put("driver", PgCore.ORG_POSTGRESQL_DRIVER);
-        //sparkProps.put("dbtable", "public.table_countries");
-        //sparkProps.put("batchsize", "1000");
-        //sparkProps.put("ApplicationName", "spark-java-writer");
-        //sparkProps.put("stringtype", "unspecified");
-        //sparkProps.put("reWriteBatchedInserts", true);
+        sparkProps.put("driver", PgCore.ORG_POSTGRESQL_DRIVER);
+        sparkProps.put("batchsize", "1000");
+        sparkProps.put("ApplicationName", "spark-java-writer");
+        sparkProps.put("stringtype", "unspecified");
+        sparkProps.put("reWriteBatchedInserts", "true");
 
         Properties pgProps = new Properties();
 
