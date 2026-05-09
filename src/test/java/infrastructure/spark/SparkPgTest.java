@@ -43,6 +43,7 @@ class SparkPgTest {
         String schema = "public";
         String table = "table_countries";
         Dataset<Row> df = sparkSession.read().option("header", true).csv("src/test/resources/samples/s1.csv");
+        long start = System.currentTimeMillis();
 
         // when
         SparkPg.write(df, url, id, pass, schema, table, SaveMode.Overwrite, 100);
@@ -64,7 +65,7 @@ class SparkPgTest {
         Assertions.assertThat(info.schema()).isEqualTo(schema);
         Assertions.assertThat(info.table()).isEqualTo(table);
         Assertions.assertThat(info.durationTimeMs()).isGreaterThan(0L);
-        Assertions.assertThat(info.triggerTimeMs()).isGreaterThan(System.currentTimeMillis());
+        Assertions.assertThat(info.triggerTimeMs()).isGreaterThan(start);
     }
 
     @Test
