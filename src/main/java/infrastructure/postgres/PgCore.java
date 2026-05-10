@@ -16,13 +16,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Map;
 
 public class PgCore {
 
     private static final Logger log = LoggerFactory.getLogger(PgCore.class);
 
     // safe driver name
-    public static final String ORG_POSTGRESQL_DRIVER = org.postgresql.Driver.class.getCanonicalName();;
+    public static final String ORG_POSTGRESQL_DRIVER = org.postgresql.Driver.class.getCanonicalName();
 
     public static NamedParameterJdbcTemplate getNamedParameterJdbcTemplate(String url, String id, String pass) {
         HikariDataSource hikariDataSource = getHikariDataSource(url, id, pass);
@@ -61,7 +62,8 @@ public class PgCore {
 
         long start = System.currentTimeMillis();
         String absolutePath = new File(path, file).getAbsolutePath();
-        log.info("copy csv. file : {} , schema : {} , table : {}", absolutePath, schema, table);
+        Map<String, Object> logParams = new java.util.HashMap<>(Map.of("schema", schema, "table", table, "absolute path", absolutePath));
+        log.info("start copy csv. {}", logParams);
 
         JdbcCore.JdbcSecrets jdbcSecrets = JdbcCore.JdbcSecrets.getJdbcSecrets((HikariDataSource) jdbcTemplate.getDataSource());
         String sql = """
@@ -75,6 +77,7 @@ public class PgCore {
         try {
             // jdbcTemplate.execute(sql) throws error
 
+            boolean delete = new File(path + file).delete();
             FileOutputStream fileOutputStream = new FileOutputStream(path + file);
 
             // pg CopyManager enable query to stdout
@@ -83,7 +86,8 @@ public class PgCore {
             copyManager.copyOut(sql, fileOutputStream);
 
             long time = System.currentTimeMillis() - start;
-            log.info("copy table to csv OK. time ms : {}", time);
+            logParams.put("time ms", time);
+            log.info("copy table to csv OK. {}", logParams);
 
         } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
