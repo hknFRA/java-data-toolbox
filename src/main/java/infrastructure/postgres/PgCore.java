@@ -21,7 +21,8 @@ public class PgCore {
 
     private static final Logger log = LoggerFactory.getLogger(PgCore.class);
 
-    public static final String ORG_POSTGRESQL_DRIVER = "org.postgresql.Driver";
+    // safe driver name
+    public static final String ORG_POSTGRESQL_DRIVER = org.postgresql.Driver.class.getCanonicalName();;
 
     public static NamedParameterJdbcTemplate getNamedParameterJdbcTemplate(String url, String id, String pass) {
         HikariDataSource hikariDataSource = getHikariDataSource(url, id, pass);

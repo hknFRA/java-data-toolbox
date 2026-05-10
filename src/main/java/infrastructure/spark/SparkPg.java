@@ -5,6 +5,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
+import org.postgresql.PGProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,10 +45,10 @@ public class SparkPg {
                 .option("batchsize", batchSize)
 
                 // jdbc custom tuning : https://jdbc.postgresql.org/documentation/use/
-                .option("currentSchema", schema)
-                .option("ApplicationName", "spark-java-writer")
-                .option("stringtype", "unspecified")
-                .option("reWriteBatchedInserts", true)
+                .option(PGProperty.CURRENT_SCHEMA.getName(), schema)
+                .option(PGProperty.APPLICATION_NAME.getName(), "spark-java-writer")
+                .option(PGProperty.STRING_TYPE.getName(), "unspecified")
+                .option(PGProperty.REWRITE_BATCHED_INSERTS.getName(), true)
                 .mode(saveMode)
                 .save();
     }
@@ -68,6 +69,7 @@ public class SparkPg {
         dataset.write()
                 .mode(saveMode)
                 .jdbc(url, tableFinal, sparkProps);
+
     }
 
 
@@ -92,7 +94,7 @@ public class SparkPg {
                 .option("driver", PgCore.ORG_POSTGRESQL_DRIVER)
                 .option("dbtable", tableFinal)
                 // jdbc
-                .option("ApplicationName", "spark-java-reader")
+                .option(PGProperty.APPLICATION_NAME.getName(), "spark-java-reader")
                 .load();
         df.printSchema();
 
@@ -118,7 +120,7 @@ public class SparkPg {
                 .option("driver", PgCore.ORG_POSTGRESQL_DRIVER)
                 .option("query", sql)
                 // jdbc
-                .option("ApplicationName", "spark-java-reader")
+                .option(PGProperty.APPLICATION_NAME.getName(), "spark-java-reader")
                 .load();
         df.printSchema();
 
