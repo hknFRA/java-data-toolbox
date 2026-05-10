@@ -6,8 +6,6 @@ src/test/resources/out/
 .idea
 java-data-toolbox.iml
 /target
-src/test/out/
-src/test/java/local/
 
 ### Eclipse ###
 .apt_generated
@@ -33,3 +31,8 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+# local dev
+/local/
+src/test/out/
+src/test/java/local/
