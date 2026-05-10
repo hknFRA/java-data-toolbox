@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Appender pour afficher les logs dans la console -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- external dependencies -->
+<!--    <logger name="org.apache.spark" level="WARN"/>-->
+<!--    <logger name="org.apache.hadoop" level="WARN"/>-->
+<!--    <logger name="org.apache.kafka" level="WARN"/>-->
+<!--    <logger name="org.apache.cassandra" level="WARN"/>-->
+<!--    <logger name="com.datastax" level="WARN"/>-->
+<!--    <logger name="org.postgresql" level="WARN"/>-->
+<!--    <logger name="org.springframework" level="WARN"/>-->
+<!--    <logger name="com.zaxxer.hikari" level="WARN"/>-->
+<!--    <logger name="software.amazon.awssdk" level="WARN"/>-->
+<!--    <logger name="com.fasterxml.jackson" level="WARN"/>-->
+<!--    <logger name="io.github.resilience4j" level="WARN"/>-->
+<!--    <logger name="org.flywaydb" level="WARN"/>-->
+<!--    <logger name="org.mapstruct" level="WARN"/>-->
+<!--    <logger name="io.zonky.test.db" level="WARN"/>-->
+
+    <!-- root level -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
+
