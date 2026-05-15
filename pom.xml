@@ -12,8 +12,10 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
 
-        <!-- use in pom-->
+        <!-- used in pom-->
         <scala.main.version>2.13</scala.main.version>
+        <flyway.version>12.1.0</flyway.version>
+        <jackson-tools.version>3.1.3</jackson-tools.version>
     </properties>
 
     <dependencies>
@@ -118,6 +120,22 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.20.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/tools.jackson.core/jackson-databind -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-tools.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/tools.jackson.core/jackson-core -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-tools.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -244,7 +262,15 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>9.22.3</version>
+            <version>${flyway.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/org.flywaydb/flyway-database-cassandra -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-cassandra</artifactId>
+            <version>${flyway.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -272,5 +298,21 @@
 <!--        </dependency>-->
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Maven Surefire Plugin for running tests with environment variables -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M9</version>
+                <configuration>
+                    <environmentVariables>
+                        <FLYWAY_NATIVE_CONNECTORS>true</FLYWAY_NATIVE_CONNECTORS>
+                    </environmentVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
