@@ -111,7 +111,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.16.0</version>
+            <version>2.21</version>
             <scope>compile</scope>
         </dependency>
 
@@ -271,6 +271,30 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-cassandra</artifactId>
             <version>${flyway.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/org.flywaydb/flyway-nc-core -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-nc-core</artifactId>
+            <version>${flyway.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/org.flywaydb/flyway-nc-scanners -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-nc-scanners</artifactId>
+            <version>${flyway.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/com.ing.data/cassandra-jdbc-wrapper -->
+        <dependency>
+            <groupId>com.ing.data</groupId>
+            <artifactId>cassandra-jdbc-wrapper</artifactId>
+            <version>4.16.3</version>
             <scope>compile</scope>
         </dependency>
 

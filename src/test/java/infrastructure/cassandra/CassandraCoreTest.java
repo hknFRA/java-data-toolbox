@@ -12,8 +12,8 @@ class CassandraCoreTest {
 
     @Test
     void test_flyway_cassandra_migration() {
-        FlywayCore.flywayInitTablesCassandra(
-                "cassandra://37583650-e472-4654-9711-44620fa410ee-us-east-2.db.astra.datastax.com:29042/unit_test?localdatacenter=us-east-2",
+        FlywayCore.flywayInitTablesCassandraWrapper(
+                "jdbc:cassandra://37583650-e472-4654-9711-44620fa410ee-us-east-2.db.astra.datastax.com:29042/unit_test?localdatacenter=us-east-2",
                 "YXfHOsWIFuCWORcYKKLbfMpB",
                 "D1YP7CKB.nkqJ5Ofx,5I3-9t1KmHZZ,jOs+ZSMORmMLGCHEos_TZyUe23KwJAvkmu.EQYm.BgfAwafAF2.n62t.I959p.6dfaAPkES-CQDpdcz__,zcDJQ,6-UwSlJCY",
                 "/db-testing/cassandra/migration",
