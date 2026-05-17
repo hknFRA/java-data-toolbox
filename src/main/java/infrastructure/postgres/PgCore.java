@@ -3,6 +3,7 @@ package infrastructure.postgres;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import infrastructure.JdbcCore;
+import org.postgresql.PGProperty;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
@@ -16,7 +17,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.*;
 
 public class PgCore {
 
@@ -91,6 +92,18 @@ public class PgCore {
 
         } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static void isPgPropertiesValid(Properties properties) {
+        List<String> values = Arrays
+                .stream(PGProperty.values())
+                .map(PGProperty::getName)
+                .toList();
+
+        List<String> list = properties.values().stream().map(Object::toString).toList();
+        if (!new HashSet<>(values).containsAll(list)) {
+            throw new RuntimeException("unknown pg property detected");
         }
     }
 

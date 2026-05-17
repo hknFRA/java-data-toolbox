@@ -274,6 +274,13 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+            <version>${flyway.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- Source: https://mvnrepository.com/artifact/org.flywaydb/flyway-nc-core -->
         <dependency>
             <groupId>org.flywaydb</groupId>
