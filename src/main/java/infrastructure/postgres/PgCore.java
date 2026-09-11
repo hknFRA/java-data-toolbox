@@ -3,6 +3,7 @@ package infrastructure.postgres;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import infrastructure.JdbcCore;
+import org.apache.commons.io.FileUtils;
 import org.postgresql.PGProperty;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
@@ -14,6 +15,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -56,10 +58,15 @@ public class PgCore {
     }
 
     /**
-     *
+     * use native pg CopyManager for efficiency <p>
+     * CopyManager enable query to stdout <p>
+     * https://stackoverflow.com/questions/27154579/how-to-export-data-from-postgresql-to-csv-file-using-jdbc
      */
-    public static void copyTableToCsv(JdbcTemplate jdbcTemplate, String schema, String table, String path, String file) {
-        // https://stackoverflow.com/questions/27154579/how-to-export-data-from-postgresql-to-csv-file-using-jdbc
+    public static void copyTableToCsv(JdbcTemplate jdbcTemplate,
+                                      String schema,
+                                      String table,
+                                      String path,
+                                      String file) {
 
         long start = System.currentTimeMillis();
         String absolutePath = new File(path, file).getAbsolutePath();
@@ -78,10 +85,12 @@ public class PgCore {
         try {
             // jdbcTemplate.execute(sql) throws error
 
-            boolean delete = new File(path + file).delete();
-            FileOutputStream fileOutputStream = new FileOutputStream(path + file);
+            File targetFile = new File(path + file);
+            boolean delete = targetFile.exists() ? targetFile.delete() : true;
 
             // pg CopyManager enable query to stdout
+            FileUtils.touch(targetFile);
+            FileOutputStream fileOutputStream = new FileOutputStream(targetFile);
             Connection connection = DriverManager.getConnection(jdbcSecrets.url(), jdbcSecrets.id(), jdbcSecrets.pass());
             CopyManager copyManager = new CopyManager((BaseConnection) connection);
             copyManager.copyOut(sql, fileOutputStream);
