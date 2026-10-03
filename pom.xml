@@ -8,14 +8,21 @@
     <url>http://maven.apache.org</url>
 
     <properties>
-        <!-- inferred by maven-->
+        <!-- maven-->
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
 
-        <!-- used in pom-->
+        <!-- libs-->
         <scala.main.version>2.13</scala.main.version>
         <flyway.version>12.1.0</flyway.version>
         <jackson-tools.version>3.1.3</jackson-tools.version>
+        <kafka.version>4.3.1</kafka.version>
+
+        <!-- spring-framework
+        https://github.com/spring-projects/spring-framework
+        -->
+        <spring-framework.version>7.0.9</spring-framework.version>
+
     </properties>
 
     <dependencies>
@@ -81,7 +88,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <version>7.0.7</version>
+            <version>${spring-framework.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -236,7 +243,7 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
-            <version>4.2.0</version>
+            <version>${kafka.version}</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -250,7 +257,7 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka_${scala.main.version}</artifactId>
-            <version>4.3.1</version>
+            <version>${kafka.version}</version>
             <scope>compile</scope>
         </dependency>
 
