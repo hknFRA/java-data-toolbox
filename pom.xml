@@ -20,7 +20,8 @@
         <spark.version>4.1.1</spark.version>
 
         <!-- scala
-        used as sub version by multiple spark plugin libs (cassandra, excel, testing, ...)
+        spark : used as sub version by multiple spark plugin libs (cassandra, excel, testing, ...)
+        kafka : used by kafka as it's written in scala
         -->
         <scala.main.version>2.13</scala.main.version>
 
