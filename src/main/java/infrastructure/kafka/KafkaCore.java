@@ -1,4 +1,4 @@
-package infrastructure;
+package infrastructure.kafka;
 
 import org.apache.kafka.clients.consumer.ConsumerGroupMetadata;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
