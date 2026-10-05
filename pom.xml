@@ -15,7 +15,7 @@
         <!-- libs-->
         <flyway.version>12.1.0</flyway.version>
         <jackson-tools.version>3.1.3</jackson-tools.version>
-        <kafka.version>4.3.1</kafka.version>
+        <kafka.version>4.2.1</kafka.version>
         <junit-jupiter.version>6.1.3</junit-jupiter.version>
         <spark.version>4.1.1</spark.version>
 
