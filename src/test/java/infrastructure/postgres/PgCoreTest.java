@@ -49,7 +49,7 @@ class PgCoreTest {
         String file = "s1.csv";
 
         // when
-        PgCore.copyCsvToTable(namedParameterJdbcTemplate.getJdbcTemplate(), schema, table, path, file);
+        PgCopy.copyCsvToTable(namedParameterJdbcTemplate.getJdbcTemplate(), schema, table, path, file);
 
         // result
         Map<String, @Nullable Object> map = namedParameterJdbcTemplate.getJdbcTemplate().queryForMap("select count(*) as c_ , sum(population) as s_ from %s.%s".formatted(schema, table));
@@ -70,8 +70,8 @@ class PgCoreTest {
         String fileOut = "s1.csv";
 
         // when
-        PgCore.copyCsvToTable(namedParameterJdbcTemplate.getJdbcTemplate(), schema, table, pathIn, fileIn);
-        PgCore.copyTableToCsv(namedParameterJdbcTemplate.getJdbcTemplate(), schema, table, pathOut, fileOut);
+        PgCopy.copyCsvToTable(namedParameterJdbcTemplate.getJdbcTemplate(), schema, table, pathIn, fileIn);
+        PgCopy.copyTableToCsv(namedParameterJdbcTemplate.getJdbcTemplate(), schema, table, pathOut, fileOut);
 
         // result
         List<String> strings = FileUtils.readLines(new File(pathOut + fileOut), StandardCharsets.UTF_8);
