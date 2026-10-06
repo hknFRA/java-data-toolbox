@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 
+import java.util.List;
+
 // https://stackoverflow.com/questions/76946151/embeddedkafka-without-spring-boot-in-juint5
 @EmbeddedKafka(topics = KafkaCoreTest.TOPIC)
 class KafkaCoreTest {
@@ -26,7 +28,12 @@ class KafkaCoreTest {
 
         if (!initOk) {
             // consumer
-            //kafkaConsumer = new KafkaConsumer<>();
+            kafkaConsumer = KafkaClients.getSimpleConsumer(
+                    "localhost:0",
+                    "test",
+                    "org.apache.kafka.common.serialization.StringDeserializer",
+                    "org.apache.kafka.common.serialization.StringDeserializer",
+                    List.of(TOPIC));
 
             // producer
             //kafkaProducer = new KafkaProducer<>();
