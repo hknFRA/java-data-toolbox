@@ -1,7 +1,9 @@
 package infrastructure.kafka;
 
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
@@ -28,20 +30,17 @@ class KafkaCoreTest {
 
         if (!initOk) {
             // consumer
-            kafkaConsumer = KafkaClients.getSimpleConsumer(
-                    "localhost:0",
-                    "test",
-                    "org.apache.kafka.common.serialization.StringDeserializer",
-                    "org.apache.kafka.common.serialization.StringDeserializer",
-                    List.of(TOPIC));
-
-            // producer
-            //kafkaProducer = new KafkaProducer<>();
+            String servers = "localhost:0";
+            kafkaConsumer = KafkaClients.getSimpleConsumer(servers, List.of(TOPIC));
+            kafkaProducer = KafkaClients.getSimpleProducer(servers);
+            initOk = true;
         }
     }
 
     @Test
     void given_consumer_client_should_consume_message() {
+        ProducerRecord<String, String> bonjour = new ProducerRecord<>(TOPIC, "1", "bonjour");
+        kafkaProducer.send(bonjour);
         KafkaCore.consume(kafkaConsumer, 1000L, null);
     }
 
