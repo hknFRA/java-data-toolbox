@@ -59,14 +59,11 @@ class KafkaCoreTest {
     void given_consumer_client_should_consume_message() throws ExecutionException, InterruptedException {
         // given
         ProducerRecord<String, String> bonjour = new ProducerRecord<>(TOPIC, "1", "bonjour");
-        RecordMetadata recordMetadata = kafkaProducer.send(bonjour).get();
-        RecordMetadata recordMetadata2 = kafkaProducer.send(bonjour).get();
-        System.out.println(recordMetadata2);
+        RecordMetadata r = kafkaProducer.send(bonjour).get();
+        RecordMetadata r2 = kafkaProducer.send(bonjour).get();
 
         // when
         ConsumerRecords<String, String> poll = kafkaConsumer.poll(Duration.ofMillis(1000L));
-        System.out.println();
-        //KafkaCore.consume(kafkaConsumer, 1000L, null);
 
         // then
         Assertions.assertThat(poll.count()).isGreaterThan(0);

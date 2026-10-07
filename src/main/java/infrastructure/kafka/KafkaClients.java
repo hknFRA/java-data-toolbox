@@ -16,6 +16,9 @@ public class KafkaClients {
 
     /**
      * manual commit
+     * auto.offset.reset / subscribe() / poll()
+     * subscribe() will *not* position consumer on (topic, partition, offset)
+     * positioning will be invoked at first poll()
      */
     public static <K, V> KafkaConsumer<K, V> getSimpleConsumer(String servers,
                                                                List<String> topics) {
