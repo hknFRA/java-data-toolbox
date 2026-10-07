@@ -34,11 +34,8 @@ public class KafkaClients {
     public static <K, V> KafkaProducer<K, V> getSimpleProducer(String servers) {
         Properties props = new Properties();
         props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
-        props.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, "1000");
-        props.setProperty(ProducerConfig.ACKS_CONFIG, "all");
         props.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class.getName());
         props.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class.getName());
-
         return new KafkaProducer<>(props);
     }
 

@@ -1,15 +1,25 @@
 package infrastructure.kafka;
 
 import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.kafka.test.utils.KafkaTestUtils;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 // https://stackoverflow.com/questions/76946151/embeddedkafka-without-spring-boot-in-juint5
 @EmbeddedKafka(topics = KafkaCoreTest.TOPIC)
@@ -20,7 +30,6 @@ class KafkaCoreTest {
 
     // init vars
     boolean initOk;
-    EmbeddedKafkaBroker broker;
     KafkaConsumer<String, String> kafkaConsumer;
     KafkaProducer<String, String> kafkaProducer;
 
@@ -29,19 +38,33 @@ class KafkaCoreTest {
         // inject kafka broker from before all
 
         if (!initOk) {
+            // producer
+            Map<String, Object> producerProps = KafkaTestUtils.producerProps(broker);
+            kafkaProducer = KafkaClients.getSimpleProducer(producerProps.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG).toString());
+
             // consumer
-            String servers = "localhost:0";
-            kafkaConsumer = KafkaClients.getSimpleConsumer(servers, List.of(TOPIC));
-            kafkaProducer = KafkaClients.getSimpleProducer(servers);
+            Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(broker, UUID.randomUUID().toString(), false);
+            kafkaConsumer = KafkaClients.getSimpleConsumer(consumerProps.get(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG).toString(), List.of(TOPIC));
+
             initOk = true;
         }
     }
 
     @Test
-    void given_consumer_client_should_consume_message() {
+    void given_consumer_client_should_consume_message() throws ExecutionException, InterruptedException {
+        // given
         ProducerRecord<String, String> bonjour = new ProducerRecord<>(TOPIC, "1", "bonjour");
-        kafkaProducer.send(bonjour);
-        KafkaCore.consume(kafkaConsumer, 1000L, null);
+        RecordMetadata recordMetadata = kafkaProducer.send(bonjour).get();
+        RecordMetadata recordMetadata2 = kafkaProducer.send(bonjour).get();
+        System.out.println(recordMetadata2);
+
+        // when
+        ConsumerRecords<String, String> poll = kafkaConsumer.poll(Duration.ofMillis(100L));
+        System.out.println();
+        //KafkaCore.consume(kafkaConsumer, 1000L, null);
+
+        // then
+        Assertions.assertThat(poll.count()).isGreaterThan(0);
     }
 
 
