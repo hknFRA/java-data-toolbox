@@ -9,6 +9,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
@@ -30,8 +31,8 @@ class KafkaCoreTest {
 
     // init vars
     boolean initOk;
-    KafkaConsumer<String, String> kafkaConsumer;
-    KafkaProducer<String, String> kafkaProducer;
+    static KafkaConsumer<String, String> kafkaConsumer;
+    static KafkaProducer<String, String> kafkaProducer;
 
     @BeforeEach
     void beforeEach(EmbeddedKafkaBroker broker) {
@@ -48,6 +49,12 @@ class KafkaCoreTest {
 
             initOk = true;
         }
+    }
+
+    @AfterAll
+    static void afterAll() {
+        kafkaConsumer.close();
+        kafkaProducer.close();
     }
 
     /**
