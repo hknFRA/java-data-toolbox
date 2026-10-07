@@ -50,6 +50,11 @@ class KafkaCoreTest {
         }
     }
 
+    /**
+     * seems that poll timeout is reached differently depending on chipset
+     * M2 Pro : 100L OK
+     * M5 : 1000L OK
+     */
     @Test
     void given_consumer_client_should_consume_message() throws ExecutionException, InterruptedException {
         // given
@@ -59,7 +64,7 @@ class KafkaCoreTest {
         System.out.println(recordMetadata2);
 
         // when
-        ConsumerRecords<String, String> poll = kafkaConsumer.poll(Duration.ofMillis(100L));
+        ConsumerRecords<String, String> poll = kafkaConsumer.poll(Duration.ofMillis(1000L));
         System.out.println();
         //KafkaCore.consume(kafkaConsumer, 1000L, null);
 

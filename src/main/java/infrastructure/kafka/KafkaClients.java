@@ -24,6 +24,7 @@ public class KafkaClients {
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
         props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class.getName());
         props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class.getName());
+        props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         KafkaConsumer<K, V> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(topics);
@@ -36,6 +37,7 @@ public class KafkaClients {
         props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         props.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class.getName());
         props.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class.getName());
+        props.setProperty(ProducerConfig.ACKS_CONFIG, "all");
         return new KafkaProducer<>(props);
     }
 
