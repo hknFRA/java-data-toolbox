@@ -1,7 +1,7 @@
 package infrastructure.postgres;
 
 import com.zaxxer.hikari.HikariDataSource;
-import infrastructure.JdbcCore;
+import infrastructure.jdbc.JdbcSecrets;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.postgresql.copy.CopyManager;
@@ -51,7 +51,7 @@ public class PgCopy {
         Map<String, Object> logParams = new java.util.HashMap<>(Map.of("schema", schema, "table", table, "absolute path", absolutePath));
         log.info("start copy csv. {}", logParams);
 
-        JdbcCore.JdbcSecrets jdbcSecrets = JdbcCore.JdbcSecrets.getJdbcSecrets((HikariDataSource) jdbcTemplate.getDataSource());
+        JdbcSecrets jdbcSecrets = JdbcSecrets.getJdbcSecrets((HikariDataSource) jdbcTemplate.getDataSource());
         String sql = """
                 COPY %s.%s
                 TO STDOUT

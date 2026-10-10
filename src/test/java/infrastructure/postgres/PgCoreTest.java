@@ -1,6 +1,6 @@
 package infrastructure.postgres;
 
-import infrastructure.JdbcCore;
+import infrastructure.jdbc.JdbcSecrets;
 import infrastructure.jdbc.JdbcTemplateClients;
 import io.zonky.test.db.postgres.embedded.FlywayPreparer;
 import io.zonky.test.db.postgres.junit5.EmbeddedPostgresExtension;
@@ -27,7 +27,7 @@ class PgCoreTest {
             EmbeddedPostgresExtension.preparedDatabase(
                     FlywayPreparer.forClasspathLocation("db-testing/postgres/migration"));
 
-    JdbcCore.JdbcSecrets secrets = JdbcCore.JdbcSecrets.getJdbcSecrets(db.getTestDatabase());
+    JdbcSecrets secrets = JdbcSecrets.getJdbcSecrets(db.getTestDatabase());
     String url = secrets.url();
     String id = secrets.id();
     String pass = "";

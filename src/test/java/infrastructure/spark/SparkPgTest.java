@@ -1,7 +1,7 @@
 package infrastructure.spark;
 
 import com.holdenkarau.spark.testing.JavaDatasetSuiteBase;
-import infrastructure.JdbcCore;
+import infrastructure.jdbc.JdbcSecrets;
 import infrastructure.jdbc.JdbcTemplateClients;
 import infrastructure.postgres.PgCore;
 import io.zonky.test.db.postgres.embedded.FlywayPreparer;
@@ -27,7 +27,7 @@ class SparkPgTest {
             EmbeddedPostgresExtension.preparedDatabase(
                     FlywayPreparer.forClasspathLocation("db-testing/postgres/migration"));
 
-    JdbcCore.JdbcSecrets secrets = JdbcCore.JdbcSecrets.getJdbcSecrets(db.getTestDatabase());
+    JdbcSecrets secrets = JdbcSecrets.getJdbcSecrets(db.getTestDatabase());
     String url = secrets.url();
     String id = secrets.id();
     String pass = "";
