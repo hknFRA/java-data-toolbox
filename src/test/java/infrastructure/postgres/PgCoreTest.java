@@ -1,6 +1,7 @@
 package infrastructure.postgres;
 
 import infrastructure.JdbcCore;
+import infrastructure.jdbc.JdbcTemplateClients;
 import io.zonky.test.db.postgres.embedded.FlywayPreparer;
 import io.zonky.test.db.postgres.junit5.EmbeddedPostgresExtension;
 import io.zonky.test.db.postgres.junit5.PreparedDbExtension;
@@ -31,7 +32,7 @@ class PgCoreTest {
     String id = secrets.id();
     String pass = "";
 
-    NamedParameterJdbcTemplate namedParameterJdbcTemplate = PgCore.getNamedParameterJdbcTemplate(url, id, pass);
+    NamedParameterJdbcTemplate namedParameterJdbcTemplate = JdbcTemplateClients.getNamedParameterJdbcTemplate(url, id, pass, PgCore.ORG_POSTGRESQL_DRIVER);
 
     @BeforeEach
     void beforeEach() throws IOException {

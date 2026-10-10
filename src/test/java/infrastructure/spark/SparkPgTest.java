@@ -2,6 +2,7 @@ package infrastructure.spark;
 
 import com.holdenkarau.spark.testing.JavaDatasetSuiteBase;
 import infrastructure.JdbcCore;
+import infrastructure.jdbc.JdbcTemplateClients;
 import infrastructure.postgres.PgCore;
 import io.zonky.test.db.postgres.embedded.FlywayPreparer;
 import io.zonky.test.db.postgres.junit5.EmbeddedPostgresExtension;
@@ -33,7 +34,7 @@ class SparkPgTest {
 
     SparkSession sparkSession = SparkCore.getUnitTestSparkSession();
 
-    NamedParameterJdbcTemplate namedParameterJdbcTemplate = PgCore.getNamedParameterJdbcTemplate(url, id, pass);
+    NamedParameterJdbcTemplate namedParameterJdbcTemplate = JdbcTemplateClients.getNamedParameterJdbcTemplate(url, id, pass, PgCore.ORG_POSTGRESQL_DRIVER);
 
     JavaDatasetSuiteBase javaDatasetSuiteBase = new JavaDatasetSuiteBase();
 
