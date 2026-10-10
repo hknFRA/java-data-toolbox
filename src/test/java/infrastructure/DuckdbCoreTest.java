@@ -1,10 +1,13 @@
 package infrastructure;
 
+import org.apache.commons.io.FileUtils;
 import org.assertj.core.api.Assertions;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import java.io.File;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +17,6 @@ class DuckdbCoreTest {
     void test_init_jdbc_template_on_duckdb() {
         // given
         String absolutePath = "/Users/hakan/IdeaProjects/java-data-toolbox/src/test/resources/samples/s1.csv";
-        long start = System.currentTimeMillis();
 
         // when
         NamedParameterJdbcTemplate duckDbClient = DuckdbCore.getDuckDbClient("jdbc:duckdb:memory", "", "");
@@ -30,6 +32,25 @@ class DuckdbCoreTest {
         Assertions.assertThat(max.getFirst().get("_max")).isEqualTo(200000L);
         Assertions.assertThat(token.timeMs()).isGreaterThan(0L);
         Assertions.assertThat(token.path()).isEqualTo(absolutePath);
+    }
+
+    @Test
+    void test_write_parquet_with_duckdb() {
+        // given
+        String absolutePath = "/Users/hakan/IdeaProjects/java-data-toolbox/src/test/resources/samples/s1.csv";
+        String targetPath = "/Users/hakan/IdeaProjects/java-data-toolbox/src/test/out";
+        String targetFile = "my_file";
+
+        // when
+        NamedParameterJdbcTemplate duckDbClient = DuckdbCore.getDuckDbClient("jdbc:duckdb:memory", "", "");
+        DuckdbCore.Result token = DuckdbCore.loadCsv(duckDbClient, absolutePath);
+        DuckdbCore.writeParquet(duckDbClient, token.table(), targetPath, targetFile);
+
+        // result
+        Collection<File> files = FileUtils.listFiles(new File(targetPath), new String[]{"parquet"}, false);
+
+        // then
+        Assertions.assertThat(files.size()).isEqualTo(1);
     }
 
 }

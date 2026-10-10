@@ -25,7 +25,8 @@ public class DuckdbCore {
     /**
      *
      */
-    public static Result loadCsv(NamedParameterJdbcTemplate duckdbClient, String absolutePath) {
+    public static Result loadCsv(NamedParameterJdbcTemplate duckdbClient,
+                                 String absolutePath) {
         long start = System.currentTimeMillis();
         String uuid = "csv_" + UUID.randomUUID().toString().replace("-", "_");
         String sql = """
@@ -36,6 +37,24 @@ public class DuckdbCore {
 
         long time = System.currentTimeMillis() - start;
         return new Result(uuid, time, absolutePath);
+    }
+
+    public static Result writeParquet(NamedParameterJdbcTemplate duckdbClient,
+                                      String sourceTable,
+                                      String targetPath,
+                                      String targetFile) {
+        long start = System.currentTimeMillis();
+
+        String fullPath = targetPath + "/" + targetFile + ".parquet";
+        String sql = """
+                COPY %s
+                TO '%s'
+                (FORMAT parquet);
+                """.formatted(sourceTable, fullPath);
+        duckdbClient.getJdbcTemplate().execute(sql);
+
+        long timeMs = System.currentTimeMillis() - start;
+        return new Result(sourceTable, timeMs, fullPath);
     }
 
 }
