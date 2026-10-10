@@ -1,6 +1,7 @@
 package infrastructure;
 
 import com.zaxxer.hikari.HikariDataSource;
+import infrastructure.postgres.PgCore;
 import org.postgresql.ds.PGSimpleDataSource;
 
 import javax.sql.DataSource;
@@ -17,7 +18,14 @@ public class JdbcCore {
             try {
                 String url = dataSource.getConnection().getMetaData().getURL();
                 String id = dataSource.getConnection().getMetaData().getUserName();
-                String pass = ((PGSimpleDataSource) dataSource).getPassword();
+
+                String pass;
+                if (dataSource.getConnection().getMetaData().getDriverName().equals(PgCore.ORG_POSTGRESQL_DRIVER)) {
+                    pass = ((PGSimpleDataSource) dataSource).getPassword();
+                } else {
+                    pass = null;
+                }
+
                 return new JdbcSecrets(url, id, pass);
             } catch (SQLException e) {
                 throw new RuntimeException(e);

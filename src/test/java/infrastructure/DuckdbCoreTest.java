@@ -26,7 +26,6 @@ class DuckdbCoreTest {
         // then
         Assertions.assertThat(maps).hasSize(3);
         Assertions.assertThat(max.getFirst().get("_max")).isEqualTo(200000L);
-        System.out.println();
     }
 
 }
