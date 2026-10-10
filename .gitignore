@@ -36,3 +36,7 @@ bin/
 /local/
 src/test/out/
 src/test/java/local/
+
+# duckdb
+memory
+memory.wal
