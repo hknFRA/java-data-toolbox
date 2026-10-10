@@ -17,11 +17,11 @@ class DuckdbCoreTest {
 
         // when
         NamedParameterJdbcTemplate duckDbClient = DuckdbCore.getDuckDbClient("jdbc:duckdb:memory", "", "");
-        String s = DuckdbCore.loadCsv(duckDbClient, absolutePath);
+        String table = DuckdbCore.loadCsv(duckDbClient, absolutePath).table();
 
         // result
-        List<Map<String, @Nullable Object>> maps = duckDbClient.getJdbcTemplate().queryForList("select * from %s".formatted(s));
-        List<Map<String, @Nullable Object>> max = duckDbClient.getJdbcTemplate().queryForList("select max(population) as _max from %s".formatted(s));
+        List<Map<String, @Nullable Object>> maps = duckDbClient.getJdbcTemplate().queryForList("select * from %s".formatted(table));
+        List<Map<String, @Nullable Object>> max = duckDbClient.getJdbcTemplate().queryForList("select max(population) as _max from %s".formatted(table));
 
         // then
         Assertions.assertThat(maps).hasSize(3);
