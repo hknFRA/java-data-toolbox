@@ -14,10 +14,12 @@ class DuckdbCoreTest {
     void test_init_jdbc_template_on_duckdb() {
         // given
         String absolutePath = "/Users/hakan/IdeaProjects/java-data-toolbox/src/test/resources/samples/s1.csv";
+        long start = System.currentTimeMillis();
 
         // when
         NamedParameterJdbcTemplate duckDbClient = DuckdbCore.getDuckDbClient("jdbc:duckdb:memory", "", "");
-        String table = DuckdbCore.loadCsv(duckDbClient, absolutePath).table();
+        DuckdbCore.Result token = DuckdbCore.loadCsv(duckDbClient, absolutePath);
+        String table = token.table();
 
         // result
         List<Map<String, @Nullable Object>> maps = duckDbClient.getJdbcTemplate().queryForList("select * from %s".formatted(table));
@@ -26,6 +28,8 @@ class DuckdbCoreTest {
         // then
         Assertions.assertThat(maps).hasSize(3);
         Assertions.assertThat(max.getFirst().get("_max")).isEqualTo(200000L);
+        Assertions.assertThat(token.timeMs()).isGreaterThan(0L);
+        Assertions.assertThat(token.path()).isEqualTo(absolutePath);
     }
 
 }
