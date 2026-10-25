@@ -19,7 +19,7 @@ class DuckdbCoreTest {
         String absolutePath = "/Users/hakan/IdeaProjects/java-data-toolbox/src/test/resources/samples/s1.csv";
 
         // when
-        NamedParameterJdbcTemplate duckDbClient = DuckdbCore.getDuckDbClient("jdbc:duckdb:memory", "", "");
+        NamedParameterJdbcTemplate duckDbClient = DuckdbCore.getDuckDbOnMemoryClient();
         DuckdbCore.Result token = DuckdbCore.loadCsv(duckDbClient, absolutePath);
         String table = token.table();
 
@@ -42,15 +42,16 @@ class DuckdbCoreTest {
         String targetFile = "my_file";
 
         // when
-        NamedParameterJdbcTemplate duckDbClient = DuckdbCore.getDuckDbClient("jdbc:duckdb:memory", "", "");
-        DuckdbCore.Result token = DuckdbCore.loadCsv(duckDbClient, absolutePath);
-        DuckdbCore.writeParquet(duckDbClient, token.table(), targetPath, targetFile);
+        NamedParameterJdbcTemplate duckDbClient = DuckdbCore.getDuckDbOnMemoryClient();
+        DuckdbCore.Result r1 = DuckdbCore.loadCsv(duckDbClient, absolutePath);
+        DuckdbCore.Result r2 = DuckdbCore.writeParquet(duckDbClient, r1.table(), targetPath, targetFile);
 
         // result
         Collection<File> files = FileUtils.listFiles(new File(targetPath), new String[]{"parquet"}, false);
 
         // then
         Assertions.assertThat(files.size()).isEqualTo(1);
+        Assertions.assertThat(r2.path()).isEqualTo(targetPath + "/" + targetFile + ".parquet");
     }
 
 }

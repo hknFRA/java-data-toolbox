@@ -16,10 +16,12 @@ public class DuckdbCore {
 
     public static final String ORG_DUCKDB_DUCK_DB_DRIVER = org.duckdb.DuckDBDriver.class.getCanonicalName();
 
-    public static NamedParameterJdbcTemplate getDuckDbClient(String url,
-                                                             String id,
-                                                             String pass) {
+    public static NamedParameterJdbcTemplate getDuckDbClient(String url, String id, String pass) {
         return JdbcTemplateClients.getNamedParameterJdbcTemplate(url, id, pass, ORG_DUCKDB_DUCK_DB_DRIVER);
+    }
+
+    public static NamedParameterJdbcTemplate getDuckDbOnMemoryClient() {
+        return DuckdbCore.getDuckDbClient("jdbc:duckdb:memory", "", "");
     }
 
     /**
