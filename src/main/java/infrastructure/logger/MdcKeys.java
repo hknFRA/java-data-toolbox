@@ -18,6 +18,11 @@ public enum MdcKeys {
     mdc_kafka_producer_partition,
     mdc_kafka_producer_offset,
     mdc_kafka_producer_timestamp,
+    mdc_kafka_producer_send_time_ms,
+
+    // spark
+    mdc_spark_app_name,
+    mdc_spark_master,
 
     // spark JDBC
     mdc_spark_jdbc_url,

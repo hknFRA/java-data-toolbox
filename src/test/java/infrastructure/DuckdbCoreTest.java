@@ -35,7 +35,7 @@ class DuckdbCoreTest {
     }
 
     @Test
-    void test_write_parquet_with_duckdb() {
+    void test_with_duckdb_given_csv_should_write_parquet() {
         // given
         String absolutePath = "/Users/hakan/IdeaProjects/java-data-toolbox/src/test/resources/samples/s1.csv";
         String targetPath = "/Users/hakan/IdeaProjects/java-data-toolbox/src/test/out";

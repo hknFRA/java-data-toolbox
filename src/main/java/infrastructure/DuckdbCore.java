@@ -25,7 +25,7 @@ public class DuckdbCore {
     }
 
     /**
-     *
+     * load csv file to duck db table
      */
     public static Result loadCsv(NamedParameterJdbcTemplate duckdbClient,
                                  String absolutePath) {
