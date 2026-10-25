@@ -8,8 +8,13 @@ import org.apache.spark.sql.SparkSession;
 import org.postgresql.PGProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
+import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
+
+import static infrastructure.logger.MdcKeys.*;
 
 public class SparkPg {
 
@@ -107,9 +112,15 @@ public class SparkPg {
      */
     public static Info readSql(SparkSession sparkSession, String url, String user, String pass, String sql) {
 
+        Map<String, String> logMdc = new TreeMap<>(Map.of(
+                mdc_spark_jdbc_url.name(), url,
+                mdc_spark_jdbc_user.name(), user
+        ));
+
         long start = System.currentTimeMillis();
-        log.info("start read spark jdbc. url : {} , user : {}, sql : {}",
-                url, user, sql);
+        logMdc.forEach(MDC::put);
+        log.info("spark JDBC read start. {}", logMdc);
+        log.debug("spark JDBC sql. {}", sql);
 
         Dataset<Row> df = sparkSession.read()
                 .format("jdbc")
@@ -125,6 +136,8 @@ public class SparkPg {
         df.printSchema();
 
         long time = System.currentTimeMillis() - start;
+        logMdc.put(mdc_spark_jdbc_time_ms.name(), String.valueOf(time));
+        log.info("spark JDBC read end. {}", logMdc);
         return new Info(df, null, null, sql, time, start);
     }
 }
