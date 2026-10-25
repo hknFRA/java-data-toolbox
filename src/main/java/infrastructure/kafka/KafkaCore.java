@@ -41,7 +41,11 @@ public class KafkaCore {
         MDC.put("mdc_kafka_consumer_group_id", String.valueOf(consumerGroupMetadata.groupInstanceId()));
         MDC.put("mdc_kafka_consumer_member_id", consumerGroupMetadata.memberId());
 
+        long start = System.currentTimeMillis();
         ConsumerRecords<K, V> records = kafkaConsumer.poll(Duration.ofMillis(millisTimeout));
+        long end = System.currentTimeMillis() - start;
+        MDC.put(mdc_kafka_consumer_poll_time_ms.name(), String.valueOf(end));
+
         records.forEach(kvConsumerRecord -> {
             // record logs
             MDC.put("mdc_kafka_consumer_topic", kvConsumerRecord.topic());

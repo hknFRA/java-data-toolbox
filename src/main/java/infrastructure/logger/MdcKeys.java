@@ -12,6 +12,7 @@ public enum MdcKeys {
     mdc_kafka_consumer_topic,
     mdc_kafka_consumer_partition,
     mdc_kafka_consumer_offset,
+    mdc_kafka_consumer_poll_time_ms,
 
     // kafka producer
     mdc_kafka_producer_topic,
