@@ -12,8 +12,12 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.time.Duration;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+
+import static infrastructure.logger.MdcKeys.*;
 
 public class KafkaCore {
 
@@ -54,24 +58,24 @@ public class KafkaCore {
 
 
     /**
-     * blocking
-     *
-     * @param kafkaProducer
-     * @param producerRecord
-     * @param <K>
-     * @param <V>
-     * @throws ExecutionException
-     * @throws InterruptedException
+     * blocking send
      */
     static public <K, V> void produce(KafkaProducer<K, V> kafkaProducer,
                                       ProducerRecord<K, V> producerRecord) throws ExecutionException, InterruptedException {
 
+        long startTime = System.currentTimeMillis();
+        Map<String, String> logMdc = new TreeMap<>();
+
         RecordMetadata recordMetadata = kafkaProducer.send(producerRecord).get();
 
-        MDC.put("mdc_kafka_producer_topic", recordMetadata.topic());
-        MDC.put("mdc_kafka_producer_partition", String.valueOf(recordMetadata.partition()));
-        MDC.put("mdc_kafka_producer_offset", String.valueOf(recordMetadata.offset()));
-        MDC.put("mdc_kafka_producer_timestamp", String.valueOf(recordMetadata.timestamp()));
-        log.info("kafka message produce ok");
+        // log
+        logMdc.put(mdc_kafka_producer_topic.name(), recordMetadata.topic());
+        logMdc.put(mdc_kafka_producer_partition.name(), String.valueOf(recordMetadata.partition()));
+        logMdc.put(mdc_kafka_producer_offset.name(), String.valueOf(recordMetadata.offset()));
+        logMdc.put(mdc_kafka_producer_timestamp.name(), String.valueOf(recordMetadata.timestamp()));
+        long endTime = System.currentTimeMillis() - startTime;
+        logMdc.put(mdc_kafka_producer_send_time_ms.name(), String.valueOf(endTime));
+        logMdc.forEach(MDC::put);
+        log.info("kafka message produce ok. time ms : {}", endTime);
     }
 }

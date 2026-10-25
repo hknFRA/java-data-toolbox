@@ -2,6 +2,7 @@ package infrastructure.kafka;
 
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 
 // https://stackoverflow.com/questions/76946151/embeddedkafka-without-spring-boot-in-juint5
 @EmbeddedKafka(topics = KafkaCoreTest.TOPIC)
@@ -74,6 +76,21 @@ class KafkaCoreTest {
 
         // then
         Assertions.assertThat(poll.count()).isGreaterThan(0);
+    }
+
+    @Test
+    void given_wrapped_consumer_producer_methods_should_consume_then_produce_message() throws ExecutionException, InterruptedException {
+        // given
+        ProducerRecord<String, String> bonjour = new ProducerRecord<>(TOPIC, "1", "bonjour");
+        Function<ConsumerRecord<String, String>, Boolean> function =
+                input -> {
+                    System.out.println(input);
+                    return true;
+                };
+
+        // when
+        KafkaCore.produce(kafkaProducer, bonjour);
+        KafkaCore.consume(kafkaConsumer, 10000L, function);
     }
 
 
