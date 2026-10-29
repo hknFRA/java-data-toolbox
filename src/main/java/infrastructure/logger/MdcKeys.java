@@ -32,5 +32,5 @@ public enum MdcKeys {
 
     // retry
     mdc_retry_current_attempt,
-    mdc_retry_max_attempts,
+    mdc_retry_max_attempts
 }
