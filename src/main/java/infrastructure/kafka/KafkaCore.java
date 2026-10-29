@@ -37,9 +37,9 @@ public class KafkaCore {
 
         // client logs
         ConsumerGroupMetadata consumerGroupMetadata = kafkaConsumer.groupMetadata();
-        MDC.put("mdc_kafka_consumer_group", consumerGroupMetadata.groupId());
-        MDC.put("mdc_kafka_consumer_group_id", String.valueOf(consumerGroupMetadata.groupInstanceId()));
-        MDC.put("mdc_kafka_consumer_member_id", consumerGroupMetadata.memberId());
+        MDC.put(mdc_kafka_consumer_group.name(), consumerGroupMetadata.groupId());
+        MDC.put(mdc_kafka_consumer_group_id.name(), String.valueOf(consumerGroupMetadata.groupInstanceId()));
+        MDC.put(mdc_kafka_consumer_member_id.name(), consumerGroupMetadata.memberId());
 
         long start = System.currentTimeMillis();
         ConsumerRecords<K, V> records = kafkaConsumer.poll(Duration.ofMillis(millisTimeout));
@@ -48,9 +48,9 @@ public class KafkaCore {
 
         records.forEach(kvConsumerRecord -> {
             // record logs
-            MDC.put("mdc_kafka_consumer_topic", kvConsumerRecord.topic());
-            MDC.put("mdc_kafka_consumer_partition", String.valueOf(kvConsumerRecord.partition()));
-            MDC.put("mdc_kafka_consumer_offset", String.valueOf(kvConsumerRecord.offset()));
+            MDC.put(mdc_kafka_consumer_topic.name(), kvConsumerRecord.topic());
+            MDC.put(mdc_kafka_consumer_partition.name(), String.valueOf(kvConsumerRecord.partition()));
+            MDC.put(mdc_kafka_consumer_offset.name(), String.valueOf(kvConsumerRecord.offset()));
 
             // call
             function.apply(kvConsumerRecord);
