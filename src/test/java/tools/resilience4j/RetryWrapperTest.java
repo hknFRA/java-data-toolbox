@@ -2,6 +2,7 @@ package tools.resilience4j;
 
 import com.codahale.metrics.Gauge;
 import org.junit.Assert;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Supplier;
@@ -49,6 +50,25 @@ class RetryWrapperTest {
 
         // then
         Assert.assertTrue(time > 200);
+    }
+
+    @Test
+    @Disabled
+    void test_given_supplier_should_timeout() throws Exception {
+        // given
+        long duration = 1L;
+        Supplier<Object> supplier = () -> "bonjour";
+
+        // when
+        long start = System.currentTimeMillis();
+        try {
+            Object none = TimeLimiterWrapper.timeout(supplier, duration);
+        } catch (Exception e) {
+        }
+        long time = System.currentTimeMillis() - start;
+
+        // then
+        Assert.assertTrue(time > 1000L);
     }
 
 
