@@ -14,8 +14,8 @@ import java.util.function.Supplier;
 @Slf4j
 public class RetryWrapper {
 
-    public static <T> T retry(Supplier<T> supplier,
-                              int maxAttempts, long waitDuration) {
+    public static <T> T retry(Supplier<T> supplier, int maxAttempts, long waitDuration) {
+
         // retry setup
         AtomicInteger currentAttempt = new AtomicInteger(1);
         String retryId = "retry-id" + UUID.randomUUID();
@@ -27,11 +27,15 @@ public class RetryWrapper {
         Retry retry = Retry.of(retryId, retryConfig);
         retry.getEventPublisher()
                 .onRetry(event -> {
-                            MDC.put(MdcKeys.mdc_retry_current_attempt.name(), String.valueOf(currentAttempt.get()));
-                            log.warn("error detected, going to retry. current attempt: {}", currentAttempt);
-                            currentAttempt.getAndIncrement();
-                        }
-                );
+                    MDC.put(MdcKeys.mdc_retry_current_attempt.name(), String.valueOf(currentAttempt.get()));
+                    log.warn("error detected, going to RETRY. attempt: {}/{}", currentAttempt, maxAttempts);
+                    currentAttempt.getAndIncrement();
+                })
+                .onError(event -> {
+                    MDC.put(MdcKeys.mdc_retry_current_attempt.name(), String.valueOf(currentAttempt.get()));
+                    log.error("error detected, going to STOP. attempt: {}/{}", currentAttempt, maxAttempts);
+                    currentAttempt.getAndIncrement();
+                });
 
         // execute wrapped supplier
         return Retry.decorateSupplier(retry, supplier).get();
