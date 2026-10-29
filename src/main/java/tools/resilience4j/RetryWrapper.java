@@ -28,12 +28,12 @@ public class RetryWrapper {
         retry.getEventPublisher()
                 .onRetry(event -> {
                     MDC.put(MdcKeys.mdc_retry_current_attempt.name(), String.valueOf(currentAttempt.get()));
-                    log.warn("error detected, going to RETRY. attempt: {}/{}", currentAttempt, maxAttempts);
+                    log.warn("error detected, going to RETRY. attempt: {}/{}", currentAttempt, maxAttempts, event.getLastThrowable());
                     currentAttempt.getAndIncrement();
                 })
                 .onError(event -> {
                     MDC.put(MdcKeys.mdc_retry_current_attempt.name(), String.valueOf(currentAttempt.get()));
-                    log.error("error detected, going to STOP. attempt: {}/{}", currentAttempt, maxAttempts);
+                    log.error("error detected, going to STOP. attempt: {}/{}", currentAttempt, maxAttempts, event.getLastThrowable());
                     currentAttempt.getAndIncrement();
                 });
 
