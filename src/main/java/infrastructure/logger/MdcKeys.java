@@ -31,6 +31,7 @@ public enum MdcKeys {
     mdc_spark_jdbc_time_ms,
 
     // retry
+    mdc_retry_id,
     mdc_retry_current_attempt,
     mdc_retry_max_attempts
 }

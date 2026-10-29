@@ -4,6 +4,7 @@ import infrastructure.logger.MdcKeys;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.MDC;
 
 import java.time.Duration;
@@ -14,8 +15,7 @@ import java.util.function.Supplier;
 @Slf4j
 public class RetryWrapper {
 
-    public static <T> T retry(Supplier<T> supplier, int maxAttempts, long waitDuration) {
-
+    private static @NonNull Retry getRetry(int maxAttempts, long waitDuration) {
         // retry setup
         AtomicInteger currentAttempt = new AtomicInteger(1);
         String retryId = "retry-id" + UUID.randomUUID();
@@ -35,10 +35,21 @@ public class RetryWrapper {
                     MDC.put(MdcKeys.mdc_retry_current_attempt.name(), String.valueOf(currentAttempt.get()));
                     log.error("error detected, going to STOP. attempt: {}/{}", currentAttempt, maxAttempts, event.getLastThrowable());
                     currentAttempt.getAndIncrement();
+                })
+                .onSuccess(event -> {
+                    MDC.remove(MdcKeys.mdc_retry_current_attempt.name());
                 });
+        return retry;
+    }
 
-        // execute wrapped supplier
+    public static <T> T retry(Supplier<T> supplier, int maxAttempts, long waitDuration) {
+        Retry retry = getRetry(maxAttempts, waitDuration);
         return Retry.decorateSupplier(retry, supplier).get();
+    }
+
+    public static void retry(Runnable runnable, int maxAttempts, long waitDuration) {
+        Retry retry = getRetry(maxAttempts, waitDuration);
+        Retry.decorateRunnable(retry, runnable).run();
     }
 
 
