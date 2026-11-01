@@ -86,7 +86,7 @@ public class FlywayCore {
                 .baselineVersion("0")
                 .failOnMissingLocations(true)
                 .installedBy(id)
-                .schemas("audit")
+                .schemas("public")
                 .table(historyTable)
                 .connectRetries(3)
                 .connectRetriesInterval(1)

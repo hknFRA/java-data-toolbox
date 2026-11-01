@@ -1,4 +1,4 @@
-create keyspace IF NOT EXISTS unit_test
+create keyspace IF NOT EXISTS public
     WITH REPLICATION = {
         'class': 'NetworkTopologyStrategy'
         };

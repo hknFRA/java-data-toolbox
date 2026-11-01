@@ -1,8 +1,8 @@
-CREATE TABLE IF NOT EXISTS unit_test.table_countries
+CREATE TABLE IF NOT EXISTS public.table_countries
 (
     id         text,
-    country    text,
-    city       text,
+    pays       text,
+    ville      text,
     population bigint,
     PRIMARY KEY ( id )
 )

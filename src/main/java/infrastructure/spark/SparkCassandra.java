@@ -24,26 +24,22 @@ public class SparkCassandra {
 
     private static final Logger log = LoggerFactory.getLogger(SparkCassandra.class);
 
-    public Info write(Dataset<Row> dataset, String url, String user, String pass,
-                      String keyspace, String table, SaveMode saveMode) {
+    public static Info write(Dataset<Row> dataset, String url, String user, String pass,
+                             String keyspace, String table, SaveMode saveMode) {
 
         dataset.write()
                 // common cassandra
-                .format(DefaultSource.CassandraDataSourceProviderPackageName())
-
+                .format("org.apache.spark.sql.cassandra")
                 // auth
                 .option("spark.cassandra.connection.host", url)
                 .option("spark.cassandra.auth.username", user)
                 .option("spark.cassandra.auth.password", pass)
-
                 // table
-                .option(DefaultSource.CassandraDataSourceKeyspaceNameProperty(), keyspace)
-                .option(DefaultSource.CassandraDataSourceTableNameProperty(), table)
-
+                .option("keyspace", keyspace)
+                .option("table", table)
                 // write
-                .option(WriteConf.TimestampParam().name(), "") // todo
-                .option(WriteConf.TTLParam().name(), "") // todo
-
+                //.option(WriteConf.TimestampParam().name(), "") // todo
+                //.option(WriteConf.TTLParam().name(), "") // todo
                 .mode(saveMode)
                 .save();
 
@@ -54,8 +50,8 @@ public class SparkCassandra {
     /**
      *
      * */
-    public Info read(SparkSession sparkSession, String url, String user, String pass,
-                     String keyspace, String table) {
+    public static Info read(SparkSession sparkSession, String url, String user, String pass,
+                            String keyspace, String table) {
 
         Dataset<Row> df = sparkSession.read()
                 .format(DefaultSource.CassandraDataSourceProviderPackageName())
