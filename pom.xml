@@ -35,6 +35,9 @@
         -->
         <duckdb.version>1.5.6.0</duckdb.version>
 
+        <!-- testcontainers -->
+        <testcontainers.version>2.0.1</testcontainers.version>
+
     </properties>
 
     <dependencies>
@@ -380,6 +383,45 @@
             <version>${duckdb.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-elasticsearch</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--
+        https://github.com/elastic/elasticsearch-hadoop/tree/main#installation
+        https://www.elastic.co/docs/reference/elasticsearch-hadoop/installation#_minimalistic_binaries
+        https://discuss.elastic.co/t/elasticsearch-hadoop-spark-4-compatible-release-timelines/389906/8
+        -->
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch-spark-30_${scala.main.version}</artifactId>
+            <version>9.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>co.elastic.clients</groupId>
+            <artifactId>elasticsearch-java</artifactId>
+            <version>9.5.5</version>
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -390,6 +432,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M9</version>
                 <configuration>
+                    <argLine>
+                        --add-opens=java.base/java.io=ALL-UNNAMED
+                    </argLine>
                     <environmentVariables>
                         <FLYWAY_NATIVE_CONNECTORS>true</FLYWAY_NATIVE_CONNECTORS>
                     </environmentVariables>
