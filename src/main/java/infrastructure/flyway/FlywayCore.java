@@ -86,9 +86,16 @@ public class FlywayCore {
                 .baselineVersion("0")
                 .failOnMissingLocations(true)
                 .installedBy(id)
+                .schemas("audit")
                 .table(historyTable)
                 .connectRetries(3)
-                .connectRetriesInterval(1);
+                .connectRetriesInterval(1)
+                .driver("org.apache.cassandra")
+                .communityDBSupportEnabled(false)
+                .dataSource(url, id, password)
+                .sqlMigrationSuffixes(".cql");
+        Flyway flyway = flywayConf.load();
+        flyway.migrate();
 
         // Configure Cassandra native connector via properties
         // java.util.Properties props = new java.util.Properties();
@@ -97,14 +104,6 @@ public class FlywayCore {
         // props.setProperty("flyway.password", password);
         // props.setProperty("flyway.sqlMigrationSuffixes", ".cql");
 
-        flywayConf = flywayConf
-                .driver("org.apache.cassandra")
-                .communityDBSupportEnabled(false)
-                .dataSource(url, id, password)
-                .sqlMigrationSuffixes(".cql");
-
-        Flyway flyway = flywayConf.load();
-        flyway.migrate();
     }
 
 
