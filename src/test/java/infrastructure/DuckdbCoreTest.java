@@ -54,4 +54,21 @@ class DuckdbCoreTest {
         Assertions.assertThat(r2.path()).isEqualTo(targetPath + "/" + targetFile + ".parquet");
     }
 
+    @Test
+    void test_with_duckdb_given_csv_should_join() {
+        // given
+        String f1 = "/Users/hakan/IdeaProjects/java-data-toolbox/src/test/resources/samples/s1.csv";
+        String f2 = "/Users/hakan/IdeaProjects/java-data-toolbox/src/test/resources/samples/s2.csv";
+
+        // when
+        NamedParameterJdbcTemplate duckDbClient = DuckdbCore.getDuckDbOnMemoryClient();
+        DuckdbCore.Result r1 = DuckdbCore.loadCsv(duckDbClient, f1);
+        DuckdbCore.Result r2 = DuckdbCore.loadCsv(duckDbClient, f2);
+        String sql = "select count(*) as c_ from %s inner join %s using (id)".formatted(r1.table(), r2.table());
+        long r3 = (long) duckDbClient.getJdbcTemplate().queryForMap(sql).get("c_");
+
+        // then
+        Assertions.assertThat(r3).isEqualTo(1);
+    }
+
 }
