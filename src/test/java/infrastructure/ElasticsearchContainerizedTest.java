@@ -19,20 +19,6 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Optional;
 
-// elastic + testcontainers
-// https://testcontainers.com/modules/elasticsearch/
-// https://www.elastic.co/search-labs/blog/elasticsearch-integration-tests
-// https://stackoverflow.com/a/79860621/6215824
-//
-// elastic + spark
-// https://www.elastic.co/docs/reference/elasticsearch-hadoop/installation
-// https://www.elastic.co/docs/reference/elasticsearch-hadoop/apache-spark-support#spark-sql
-// https://www.elastic.co/docs/reference/elasticsearch-hadoop/configuration#_advanced_settings
-// https://github.com/elastic/elasticsearch-hadoop/tree/main#installation
-//
-// elastic + java native
-// https://github.com/elastic/elasticsearch-java/tree/main/examples/realworld-app
-// https://github.com/elastic/elasticsearch-java/blob/main/examples/realworld-app/rw-database/src/test/java/realworld/db/ElasticClientTest.java
 public class ElasticsearchContainerizedTest {
 
     // elastic container
@@ -57,6 +43,16 @@ public class ElasticsearchContainerizedTest {
         // for spark
         Optional<byte[]> bytes = elasticsearchContainer.caCertAsBytes();
         trustStore = TrustStore.fromCaCertificate(bytes.get());
+
+        ElasticsearchClient elasticsearchClient = ElasticsearchClient.of(
+                builder ->
+                        builder.host("https://" + url)
+                                .usernameAndPassword(id, pass)
+                                .sslContext(sslContext)
+        );
+       elasticsearchClient.indices().create(c -> c.index("unit-test-container-index"));
+       elasticsearchClient.indices().create(c -> c.index("unit-test-container-index-2"));
+
     }
 
     @AfterAll
@@ -68,30 +64,27 @@ public class ElasticsearchContainerizedTest {
     void test_spark_read_to_from_elastic_should_success() throws IOException {
         // given
         Dataset<Row> df = spark.read().option("header", true).csv("src/test/resources/samples/s1.csv");
-        ElasticsearchClient elasticsearchClient = ElasticsearchClient.of(
-                builder ->
-                        builder.host("https://" + url)
-                                .usernameAndPassword(id, pass)
-                                .sslContext(sslContext)
-        );
-        CreateIndexResponse createIndexResponse = elasticsearchClient.indices().create(c -> c.index("unit-test-container-index"));
+        String index = "unit-test-container-index";
 
         // when
-        SparkElastic.write(df, url, id, pass, trustStore, "unit-test-container-index");
-        Dataset<Row> dfIdx = spark.read()
-                .format("org.elasticsearch.spark.sql")
-                .option("es.resource", "unit-test-container-index")
-                // http
-                .option("es.nodes.wan.only", "true")
-                .option("es.nodes", url)
-                .option("es.net.http.auth.user", id)
-                .option("es.net.http.auth.pass", pass)
-                // ssl
-                .option("es.net.ssl", "true")
-                .option("es.net.ssl.truststore.location", trustStore.path().toAbsolutePath().toUri().toString())
-                .option("es.net.ssl.truststore.pass", trustStore.password())
-                .option("es.net.ssl.truststore.type", "PKCS12")
-                .load();
+        SparkElastic.write(df, url, id, pass, trustStore, index);
+        Dataset<Row> dfIdx = SparkElastic.read(spark, url, id, pass, trustStore, index);
+
+        // then
+        javaDatasetSuiteBase.assertDatasetEquals(
+                df.select("id","pays","ville","population"),
+                dfIdx.select("id","pays","ville","population"));
+    }
+
+    @Test
+    void test_spark_json_write_to_elastic_should_success() throws IOException {
+        // given
+        Dataset<Row> df = spark.read().option("multiLine", true).json("src/test/resources/samples/s4.ndjson");
+        String index = "unit-test-container-index-2";
+
+        // when
+        SparkElastic.write(df, url, id, pass, trustStore, index);
+        Dataset<Row> dfIdx = SparkElastic.read(spark, url, id, pass, trustStore, index);
 
         // then
         javaDatasetSuiteBase.assertDatasetEquals(

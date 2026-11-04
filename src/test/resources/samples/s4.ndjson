@@ -1,8 +1,12 @@
 {
+  "id": 1,
   "ville": "PARIS",
-  "pays": "FRANCE"
+  "pays": "FRANCE",
+  "population": 1000
 }
 {
+  "id": 2,
   "ville": "LYON",
-  "pays": "FRANCE"
+  "pays": "FRANCE",
+  "population": 500
 }

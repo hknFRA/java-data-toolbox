@@ -7,9 +7,23 @@ import tools.java.TrustStore;
 
 import static org.elasticsearch.hadoop.cfg.ConfigurationOptions.*;
 
+// elastic + testcontainers
+// https://testcontainers.com/modules/elasticsearch/
+// https://www.elastic.co/search-labs/blog/elasticsearch-integration-tests
+// https://stackoverflow.com/a/79860621/6215824
+//
+// elastic + spark
+// https://www.elastic.co/docs/reference/elasticsearch-hadoop/installation
+// https://www.elastic.co/docs/reference/elasticsearch-hadoop/apache-spark-support#spark-sql
+// https://www.elastic.co/docs/reference/elasticsearch-hadoop/configuration#_advanced_settings
+// https://github.com/elastic/elasticsearch-hadoop/tree/main#installation
+//
+// elastic + java native
+// https://github.com/elastic/elasticsearch-java/tree/main/examples/realworld-app
+// https://github.com/elastic/elasticsearch-java/blob/main/examples/realworld-app/rw-database/src/test/java/realworld/db/ElasticClientTest.java
 public class SparkElastic {
 
-    public static Dataset<Row> read(TrustStore trustStore, String url, String id, String pass, SparkSession spark, String index) {
+    public static Dataset<Row> read(SparkSession spark, String url, String id, String pass, TrustStore trustStore, String index) {
         return spark.read()
                 .format("org.elasticsearch.spark.sql")
                 .option(ES_RESOURCE, index)
