@@ -2,10 +2,13 @@ package infrastructure;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
+import com.holdenkarau.spark.testing.JavaDatasetSuiteBase;
 import infrastructure.spark.SparkCore;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.assertj.core.api.Assertions;
+import org.elasticsearch.hadoop.cfg.ConfigurationOptions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -17,6 +20,8 @@ import tools.java.TrustStore;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Optional;
+
+import static org.elasticsearch.hadoop.cfg.ConfigurationOptions.*;
 
 // elastic + testcontainers
 // https://testcontainers.com/modules/elasticsearch/
@@ -40,13 +45,11 @@ public class ElasticsearchContainerizedTest {
     static String id;
     static String pass;
     static SSLContext sslContext;
+    static TrustStore trustStore;
 
     // spark
-    static TrustStore trustStore;
     SparkSession spark = SparkCore.getUnitTestSparkSession();
-
-
-    static SparkSession sparkSession = SparkCore.getUnitTestSparkSession();
+    JavaDatasetSuiteBase javaDatasetSuiteBase = new JavaDatasetSuiteBase();
 
     @BeforeAll
     static void beforeAll() throws Exception {
@@ -66,7 +69,6 @@ public class ElasticsearchContainerizedTest {
     }
 
     @Test
-    @Disabled
     void test_spark_read_to_from_elastic_should_success() throws IOException {
         // given
         ElasticsearchClient elasticsearchClient = ElasticsearchClient.of(
@@ -78,9 +80,24 @@ public class ElasticsearchContainerizedTest {
         CreateIndexResponse createIndexResponse = elasticsearchClient.indices().create(c -> c.index("unit-test-container-index"));
 
         // when
-        Dataset<Row> df = sparkSession.read().option("header", true).csv("src/test/resources/samples/s1.csv");
+        Dataset<Row> df = spark.read().option("header", true).csv("src/test/resources/samples/s1.csv");
         System.out.println(df.count());
         df.write()
+                .format("org.elasticsearch.spark.sql")
+                .option(ES_RESOURCE, "unit-test-container-index")
+                // http
+                .option(ES_NODES, url)
+                .option(ES_NODES_WAN_ONLY, "true")
+                .option(ES_NET_HTTP_AUTH_USER, id)
+                .option(ES_NET_HTTP_AUTH_PASS, pass)
+                // ssl
+                .option(ES_NET_USE_SSL, "true")
+                .option(ES_NET_SSL_TRUST_STORE_LOCATION, trustStore.path().toAbsolutePath().toUri().toString())
+                .option(ES_NET_SSL_TRUST_STORE_PASS, trustStore.password())
+                .option("es.net.ssl.truststore.type", "PKCS12")
+                .save();
+
+        Dataset<Row> dfIdx = spark.read()
                 .format("org.elasticsearch.spark.sql")
                 .option("es.resource", "unit-test-container-index")
                 // http
@@ -93,10 +110,12 @@ public class ElasticsearchContainerizedTest {
                 .option("es.net.ssl.truststore.location", trustStore.path().toAbsolutePath().toUri().toString())
                 .option("es.net.ssl.truststore.pass", trustStore.password())
                 .option("es.net.ssl.truststore.type", "PKCS12")
-                .save();
-
+                .load();
 
         // then
+        javaDatasetSuiteBase.assertDatasetEquals(
+                df.select("id","pays","ville","population"),
+                dfIdx.select("id","pays","ville","population"));
         System.out.println();
         System.out.println("bonjour");
 

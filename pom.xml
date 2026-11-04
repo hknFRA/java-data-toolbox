@@ -40,6 +40,20 @@
         -->
         <testcontainers.version>2.0.1</testcontainers.version>
 
+        <!-- elasticsearch
+        spark connector
+        https://github.com/elastic/elasticsearch-hadoop/tree/main#installation
+        https://www.elastic.co/docs/reference/elasticsearch-hadoop/installation#_minimalistic_binaries
+
+        spark 4+ compatibility
+        https://discuss.elastic.co/t/elasticsearch-hadoop-spark-4-compatible-release-timelines/389906/8
+        with SNAPSHOT for some maven settings compatibility,
+        change tag name in /.m2 sources with following command
+        for f in elasticsearch-spark-41_2.13-9.6.0-20261102.170304-1*; do mv "$f" "$(echo "$f" | sed s/9.6.0-20261102.170304-1/9.6.0-SNAPSHOT/)"; done
+        -->
+        <elasticsearch.version>9.5.5</elasticsearch.version>
+        <elasticsearch-spark.version>9.6.0</elasticsearch-spark.version>
+
     </properties>
 
     <dependencies>
@@ -413,21 +427,16 @@
             <scope>test</scope>
         </dependency>
 
-        <!--
-        https://github.com/elastic/elasticsearch-hadoop/tree/main#installation
-        https://www.elastic.co/docs/reference/elasticsearch-hadoop/installation#_minimalistic_binaries
-        https://discuss.elastic.co/t/elasticsearch-hadoop-spark-4-compatible-release-timelines/389906/8
-        -->
         <dependency>
             <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch-spark-30_${scala.main.version}</artifactId>
-            <version>9.0.0</version>
+            <artifactId>elasticsearch-spark-41_${scala.main.version}</artifactId>
+            <version>${elasticsearch-spark.version}</version>
         </dependency>
 
         <dependency>
             <groupId>co.elastic.clients</groupId>
             <artifactId>elasticsearch-java</artifactId>
-            <version>9.5.5</version>
+            <version>${elasticsearch.version}</version>
             <scope>compile</scope>
         </dependency>
 
