@@ -1,5 +1,7 @@
 package infrastructure.kafka;
 
+import infrastructure.spark.SparkCore;
+import infrastructure.spark.SparkKafka;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -8,6 +10,9 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +39,9 @@ class KafkaEmbeddedTest {
     boolean initOk;
     static KafkaConsumer<String, String> kafkaConsumer;
     static KafkaProducer<String, String> kafkaProducer;
+    static String servers;
+
+    SparkSession spark = SparkCore.getUnitTestSparkSession();
 
     @BeforeEach
     void beforeEach(EmbeddedKafkaBroker broker) {
@@ -42,7 +50,8 @@ class KafkaEmbeddedTest {
         if (!initOk) {
             // producer
             Map<String, Object> producerProps = KafkaTestUtils.producerProps(broker);
-            kafkaProducer = KafkaClients.getSimpleProducer(producerProps.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG).toString());
+            servers = producerProps.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG).toString();
+            kafkaProducer = KafkaClients.getSimpleProducer(servers);
 
             // consumer
             Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(broker, UUID.randomUUID().toString(), false);
@@ -90,6 +99,22 @@ class KafkaEmbeddedTest {
         // when
         KafkaCore.produce(kafkaProducer, bonjour);
         KafkaCore.consume(kafkaConsumer, 10000L, function);
+    }
+
+    @Test
+    void given_spark_should_consume_messages() throws ExecutionException, InterruptedException {
+        // given
+        ProducerRecord<String, String> bonjour = new ProducerRecord<>(TOPIC, "1", "bonjour");
+
+        // prepare data
+        KafkaCore.produce(kafkaProducer, bonjour);
+
+        // when
+        Dataset<Row> df = SparkKafka.readBatch(spark, TOPIC, servers);
+        df.show(false);
+
+        // then
+        Assertions.assertThat(df.count()).isEqualTo(1);
     }
 
 
