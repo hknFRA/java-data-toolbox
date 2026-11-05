@@ -1,6 +1,5 @@
 package infrastructure.kafka;
 
-import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -25,8 +24,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 // https://stackoverflow.com/questions/76946151/embeddedkafka-without-spring-boot-in-juint5
-@EmbeddedKafka(topics = KafkaCoreTest.TOPIC)
-class KafkaCoreTest {
+@EmbeddedKafka(topics = KafkaEmbeddedTest.TOPIC)
+class KafkaEmbeddedTest {
 
     // params
     static final String TOPIC = "my-topic";
