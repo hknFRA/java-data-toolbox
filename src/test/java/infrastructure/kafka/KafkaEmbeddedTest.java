@@ -29,11 +29,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 // https://stackoverflow.com/questions/76946151/embeddedkafka-without-spring-boot-in-juint5
-@EmbeddedKafka(topics = KafkaEmbeddedTest.TOPIC)
+@EmbeddedKafka(topics = {KafkaEmbeddedTest.TOPIC, KafkaEmbeddedTest.TOPIC_SPARK})
 class KafkaEmbeddedTest {
 
     // params
     static final String TOPIC = "my-topic";
+    static final String TOPIC_SPARK = "my-topic-spark-test";
 
     // init vars
     boolean initOk;
@@ -104,13 +105,13 @@ class KafkaEmbeddedTest {
     @Test
     void given_spark_should_consume_messages() throws ExecutionException, InterruptedException {
         // given
-        ProducerRecord<String, String> bonjour = new ProducerRecord<>(TOPIC, "1", "bonjour");
+        ProducerRecord<String, String> bonjour = new ProducerRecord<>(TOPIC_SPARK, "1", "bonjour");
 
         // prepare data
         KafkaCore.produce(kafkaProducer, bonjour);
 
         // when
-        Dataset<Row> df = SparkKafka.readBatch(spark, TOPIC, servers);
+        Dataset<Row> df = SparkKafka.readBatch(spark, TOPIC_SPARK, servers);
         df.show(false);
 
         // then
