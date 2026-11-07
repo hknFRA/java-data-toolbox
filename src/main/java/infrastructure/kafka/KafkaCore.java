@@ -17,7 +17,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
-import static infrastructure.logger.MdcKeys.*;
+import static tools.logger.MdcKeys.*;
 
 public class KafkaCore {
 

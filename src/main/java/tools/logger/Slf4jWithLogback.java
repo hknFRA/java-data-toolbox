@@ -1,4 +1,4 @@
-package infrastructure.logger;
+package tools.logger;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;

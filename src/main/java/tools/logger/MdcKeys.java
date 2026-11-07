@@ -1,4 +1,4 @@
-package infrastructure.logger;
+package tools.logger;
 
 /**
  * keys to be used in logback-json.xml

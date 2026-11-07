@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
-import static infrastructure.logger.MdcKeys.*;
+import static tools.logger.MdcKeys.*;
 
 public class SparkPg {
 

@@ -1,6 +1,6 @@
 package tools.resilience4j;
 
-import infrastructure.logger.MdcKeys;
+import tools.logger.MdcKeys;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import lombok.extern.slf4j.Slf4j;
