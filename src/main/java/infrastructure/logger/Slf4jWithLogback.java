@@ -12,7 +12,11 @@ import java.util.Optional;
 import java.util.TreeMap;
 
 /// interface (facade) : slf4j
+/// {{@link org.slf4j.Logger}}
+///
 /// implementation (engine) : logback
+/// {{@link ch.qos.logback.classic.Logger}}
+/// {{@link ch.qos.logback.classic.Level}}
 public class Slf4jWithLogback {
 // todo : study listener vs. appender
 

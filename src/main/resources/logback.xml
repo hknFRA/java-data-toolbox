@@ -1,0 +1,11 @@
+<configuration>
+    <appender name="STDOUT_ADD" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="TRACE">
+        <appender-ref ref="STDOUT_ADD"/>
+    </root>
+</configuration>
