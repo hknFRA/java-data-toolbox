@@ -25,7 +25,7 @@ class Slf4jWithLogbackTest {
     @Test
     void test_add_logback() throws JoranException {
         log.debug("test");
-        Slf4jWithLogback.addLogbackAppender("/Users/hakan/IdeaProjects/java-data-toolbox/src/main/resources/logback.xml");
+        Slf4jWithLogback.addLogbackConfiguration("/Users/hakan/IdeaProjects/java-data-toolbox/src/main/resources/logback.xml");
         //Slf4jWithLogback.changeLevel(Map.of("ROOT", "DEBUG"));
         log.trace("test");
         log.info("test");

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 /// interface (facade) : slf4j
 /// implementation (engine) : logback
@@ -36,7 +35,7 @@ public class Slf4jWithLogback {
 
 
     ///
-    public static void addLogbackAppender(String logbackPath) throws JoranException {
+    public static void addLogbackConfiguration(String logbackPath) throws JoranException {
         // context
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         Map<String, Level> tmpLogLevel = new TreeMap<>();
