@@ -22,14 +22,13 @@ public class Slf4jWithLogback {
     }
 
     public static void changeLevel(Map<String, String> loggerLevelMap) {
-        ((ch.qos.logback.classic.LoggerContext) LoggerFactory.getILoggerFactory())
-                .getLoggerList()
-                .forEach(aLogger ->
-                        Optional.ofNullable(loggerLevelMap.get(aLogger.getName()))
-                                .ifPresent(aLoggerLevel -> {
-                                    ch.qos.logback.classic.Level safeLevel = ch.qos.logback.classic.Level.valueOf(aLoggerLevel);
-                                    aLogger.setLevel(safeLevel);
-                                }));
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        loggerLevelMap.forEach((aLoggerName, aLoggerLevel) ->
+                Optional.ofNullable(loggerContext.exists(aLoggerName))
+                        .ifPresent(aLogger -> {
+                            ch.qos.logback.classic.Level safeLevel = ch.qos.logback.classic.Level.valueOf(aLoggerLevel);
+                            aLogger.setLevel(safeLevel);
+                        }));
     }
 
 
