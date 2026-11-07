@@ -47,7 +47,8 @@ public class Slf4jWithLogback {
         // context
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         Map<String, Level> tmpLogLevel = new TreeMap<>();
-        loggerContext.getLoggerList().forEach(logger -> tmpLogLevel.put(logger.getName(), logger.getLevel()));
+        loggerContext.getLoggerList().forEach(logger ->
+                tmpLogLevel.put(logger.getName(), logger.getLevel()));
 
         // configure added XML
         JoranConfigurator configurator = new JoranConfigurator();
