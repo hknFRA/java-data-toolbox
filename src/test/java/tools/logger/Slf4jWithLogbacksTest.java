@@ -1,10 +1,9 @@
-package infrastructure.logger;
+package tools.logger;
 
 import ch.qos.logback.core.joran.spi.JoranException;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tools.logger.Slf4jWithLogback;
 
 import java.util.Map;
 
