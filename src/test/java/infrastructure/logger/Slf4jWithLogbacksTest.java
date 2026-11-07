@@ -1,5 +1,6 @@
 package infrastructure.logger;
 
+import ch.qos.logback.core.joran.spi.JoranException;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,17 @@ class Slf4jWithLogbackTest {
         Slf4jWithLogback.changeLevel(Map.of("ROOT", "TRACE"));
         log.debug("test");
         log.trace("test");
+    }
+
+    @Test
+    void test_add_logback() throws JoranException {
+        log.debug("test");
+        Slf4jWithLogback.addLogbackAppender("/Users/hakan/IdeaProjects/java-data-toolbox/src/main/resources/logback.xml");
+        //Slf4jWithLogback.changeLevel(Map.of("ROOT", "DEBUG"));
+        log.trace("test");
+        log.info("test");
+        //Slf4jWithLogback.changeLevel(Map.of("ROOT", "TRACE"));
+
     }
 
 }
