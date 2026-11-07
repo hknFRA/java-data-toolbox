@@ -28,6 +28,7 @@ class Slf4jWithLogbackTest {
         Slf4jWithLogback.addLogbackConfiguration("/Users/hakan/IdeaProjects/java-data-toolbox/src/main/resources/logback.xml");
         //Slf4jWithLogback.changeLevel(Map.of("ROOT", "DEBUG"));
         log.trace("test");
+        log.debug("test");
         log.info("test");
         //Slf4jWithLogback.changeLevel(Map.of("ROOT", "TRACE"));
 
