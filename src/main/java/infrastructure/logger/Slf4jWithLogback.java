@@ -26,6 +26,8 @@ public class Slf4jWithLogback {
     }
 
     /// internal method with safe {@link Level} signature
+    ///
+    /// note : if logback level is null, class logger will take leve of is root logger
     private static void _changeLevel(Map<String, Level> loggerLevelMap) {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         loggerLevelMap.forEach((aLoggerName, aLoggerLevel) ->
