@@ -17,6 +17,8 @@ import java.util.TreeMap;
 /// implementation (engine) : logback
 /// {{@link ch.qos.logback.classic.Logger}}
 /// {{@link ch.qos.logback.classic.Level}}
+///
+/// https://javaetmoi.com/2018/03/configurez-logback-en-java/
 public class Slf4jWithLogback {
 // todo : study listener vs. appender
 
