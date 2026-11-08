@@ -28,7 +28,7 @@ class HttpClientsTest {
                     .build();
 
     @Test
-    void test_given_http_client_should_call_wiremock_api() throws IOException, InterruptedException {
+    void test_given_http_client_should_call_to_wiremock_api() throws IOException, InterruptedException {
         // given
         HttpClient httpClient = HttpClients.getSimpleHttpClient();
         String urlComplete = wireMock.baseUrl() + "/some/thing";
@@ -39,6 +39,26 @@ class HttpClientsTest {
                 .uri(URI.create(urlComplete))
                 .build();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        JsonNode jsonNode = JacksonUtils.OBJECT_MAPPER.readTree(response.body());
+
+        // then
+        Assertions.assertThat(response.statusCode()).isEqualTo(200);
+        Assertions.assertThat(response.body()).isNotNull();
+        Assertions.assertThat(jsonNode.at("/payload/customerId").stringValue()).isEqualTo("a3be9d0fc37e44e0be5e5c122d3c2453");
+    }
+
+    @Test
+    void test_given_http_client_should_call_with_retry_wrapper_to_wiremock_api() throws IOException, InterruptedException {
+        // given
+        HttpClient httpClient = HttpClients.getSimpleHttpClient();
+        String urlComplete = wireMock.baseUrl() + "/some/thing";
+
+        // when
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(URI.create(urlComplete))
+                .build();
+        HttpResponse<String> response = HttpClients.sendRequest(httpClient, request);
         JsonNode jsonNode = JacksonUtils.OBJECT_MAPPER.readTree(response.body());
 
         // then
