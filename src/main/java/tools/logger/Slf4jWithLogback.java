@@ -43,8 +43,8 @@ public class Slf4jWithLogback {
 
 
     /// input logback.xml file must have :
-    /// * appender unique name (<appender name="STDOUT_ADD")
-    /// * appender linked with ROOT logger. note : initial levels of loggers as logback.xml will be restored
+    /// * appender unique name (<appender name="STDOUT_ADD" ...)
+    /// * appender linked with ROOT logger. note : initial levels of loggers as logback.xml will be restored (<root> <appender-ref ref="STDOUT_ADD"/> ...)
     public static void addLogbackConfiguration(String logbackPath) throws JoranException {
         // context
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
