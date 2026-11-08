@@ -11,14 +11,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
-/// interface (facade) : slf4j
-/// {{@link org.slf4j.Logger}}
+/// * interface (facade) : slf4j
+/// {{@link Logger}}
 ///
-/// implementation (engine) : logback
+/// * implementation (engine) : logback
 /// {{@link ch.qos.logback.classic.Logger}}
-/// {{@link ch.qos.logback.classic.Level}}
+/// {{@link Level}}
 ///
-/// https://javaetmoi.com/2018/03/configurez-logback-en-java/
+/// [configurez-logback-en-java](https://javaetmoi.com/2018/03/configurez-logback-en-java/)
 public class Slf4jWithLogback {
 // todo : study listener vs. appender
 
@@ -42,7 +42,9 @@ public class Slf4jWithLogback {
     }
 
 
-    ///
+    /// input logback.xml file must have :
+    /// * appender unique name (<appender name="STDOUT_ADD")
+    /// * appender linked with ROOT logger. note : initial levels of loggers as logback.xml will be restored
     public static void addLogbackConfiguration(String logbackPath) throws JoranException {
         // context
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
