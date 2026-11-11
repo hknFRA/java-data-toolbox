@@ -7,10 +7,8 @@ import infrastructure.postgres.PgCore;
 import io.zonky.test.db.postgres.embedded.FlywayPreparer;
 import io.zonky.test.db.postgres.junit5.EmbeddedPostgresExtension;
 import io.zonky.test.db.postgres.junit5.PreparedDbExtension;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SaveMode;
-import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.*;
+import org.apache.spark.sql.types.DataTypes;
 import org.assertj.core.api.Assertions;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -124,6 +122,24 @@ class SparkPgTest {
 
         // then
         javaDatasetSuiteBase.assertDatasetEquals(dfResult, dfResultSql);
+    }
+
+    @Test
+    void test_given_csv_should_be_transform_and_write_to_db_and_query_sql() {
+        // given
+        String schema = "public";
+        String table = "table_countries";
+        Dataset<Row> df = sparkSession.read().option("header", true).csv("src/test/resources/samples/s1.csv");
+
+        // 1. order desc
+        Dataset<Row> df1 = df
+                .select(functions.col("population").cast(DataTypes.LongType))
+                .orderBy(functions.col("population").desc())
+                .selectExpr("population")
+                .limit(1);
+        long r1 = Long.parseLong(df1.collectAsList().getFirst().get(0).toString());
+        Assertions.assertThat(r1).isEqualTo(200000L);
+
     }
 
 }
