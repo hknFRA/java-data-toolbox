@@ -137,8 +137,16 @@ class SparkPgTest {
                 .orderBy(functions.col("population").desc())
                 .selectExpr("population")
                 .limit(1);
-        long r1 = Long.parseLong(df1.collectAsList().getFirst().get(0).toString());
+        long r1 = Long.parseLong(SparkCore.getColumnValue(df1, "population").toString());
         Assertions.assertThat(r1).isEqualTo(200000L);
+
+        // 2. count / approx
+        Dataset<Row> df2 = df
+                .select(functions.approx_count_distinct("id").as("_approx_count"),
+                        functions.count("id").as("_count"));
+
+        // 3. udf
+
 
     }
 
