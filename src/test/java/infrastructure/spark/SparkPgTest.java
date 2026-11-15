@@ -245,6 +245,7 @@ class SparkPgTest {
             Assertions.assertThat(df10.filter("is_valid = false").count()).isEqualTo(2L);
 
             // dropDuplicates
+            // python : drop_duplicates()
             // can be applied on subset
             Assertions.assertThat(dfInUnderscoresDuplicates.distinct().count()).isEqualTo(3L);
             Assertions.assertThat(dfInUnderscoresDuplicates.distinct().count()).isEqualTo(3L);
