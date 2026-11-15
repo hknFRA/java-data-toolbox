@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 
 class SparkPgTest {
 
@@ -164,10 +165,14 @@ class SparkPgTest {
 
         // 4. udf with associated column
         {
-            UDF1<Integer, Integer> udf1 = columnValue -> (int) (columnValue + Math.random());
-            sparkSession.udf().register("udf_column_plus_random", udf1, DataTypes.IntegerType);
-            //Dataset<Row> df = dfIn.selectExpr("select udf_column_plus_random(population) as random_population");
-            Dataset<Row> df = sparkSession.sql("select udf_column_plus_random(population) as random_population from df_in");
+            // udf must be invoked with spark.sql() api (not compatible with df.select())
+            // udf can refer to a regular java object who is Serializable
+
+            Random random = new Random();
+            UDF1<Long, Long> udf1 = columnValue -> columnValue + random.nextLong();
+            sparkSession.udf().register("udf_column_plus_random", udf1, DataTypes.LongType);
+            //Dataset<Row> df = dfIn.selectExpr("select *, udf_column_plus_random(population) as random_population");
+            Dataset<Row> df = sparkSession.sql("select *, udf_column_plus_random(population) as random_population from df_in");
             df.show();
         }
 
