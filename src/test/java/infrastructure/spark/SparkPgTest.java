@@ -132,6 +132,12 @@ class SparkPgTest {
         Dataset<Row> dfIn = sparkSession.read().option("header", true).csv("src/test/resources/samples/s1.csv")
                 .withColumn("population", functions.col("population").cast(DataTypes.LongType));
         dfIn.createOrReplaceTempView("df_in");
+        dfIn.cache();
+
+        Dataset<Row> dfInUnderscores = sparkSession.read().option("header", true).csv("src/test/resources/samples/s5_underscores.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+        dfInUnderscores.cache();
+
 
         // 1. order desc
         {
@@ -177,10 +183,43 @@ class SparkPgTest {
             df.show();
         }
 
-        // 5. drop
+        // 5. filter / drop
         {
             Dataset<Row> df = dfIn.drop("population", "pays", "ville");
             Assertions.assertThat(df.columns()).hasSize(1);
+
+            // python : filter allow operator like | , &
+            Dataset<Row> df2 = dfIn.filter(functions.col("population").$greater$eq(200000));
+            Assertions.assertThat(df2.count()).isEqualTo(1);
+
+            Dataset<Row> df3 = dfIn.withColumn("multiply", functions.col("population").multiply(300));
+            df3.show();
+
+            Dataset<Row> df4 = dfIn.withColumn("constant", functions.lit("CONSTANT"));
+            df4.show();
+
+            // python : allow split(col("xxxx"), "_")[0] (0 based)
+            // java : split + element_at(col("xxxx"), 1) (1 based)
+            Dataset<Row> df5 = dfInUnderscores
+                    .withColumn("splitTmp", functions.split(functions.col("year_month_report"), "_"))
+                    .withColumn("year", functions.element_at(functions.col("splitTmp"), 1))
+                    .withColumn("month", functions.element_at(functions.col("splitTmp"), 2))
+                    .drop("splitTmp");
+            df5.printSchema();
+            df5.show();
+
+            // explode
+            Dataset<Row> df6 = dfInUnderscores
+                    .withColumn("splitTmp", functions.split(functions.col("year_month_report"), "_"))
+                    .withColumn("split_explode", functions.explode(functions.col("splitTmp")));
+            df6.show();
+            Assertions.assertThat(df6.count()).isEqualTo(6L);
+
+            // regexp_replace
+            String regex = "^\\d+_";
+            Dataset<Row> df7 = dfInUnderscores
+                    .withColumn("cleaned", functions.regexp_replace(functions.col("year_month_report"), regex, ""));
+            df7.show();
         }
 
     }
