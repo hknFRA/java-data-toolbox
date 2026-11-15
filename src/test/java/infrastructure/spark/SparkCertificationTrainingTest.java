@@ -221,8 +221,10 @@ class SparkCertificationTrainingTest {
 
     @Test
     void test_time_function() {
-        // date_format -> timestamp to date string
-        // to_timestamp -> epoch second long to timestamp
+        // date_format() -> timestamp to date string
+        // from_unixtime() -> epoch second long to date string
+        // to_timestamp() -> epoch second long to timestamp
+        // show() on timestamp type human-readable string, but internally it's timestamp
 
         Dataset<Row> dfIn = spark.read().option("header", true).csv("src/test/resources/samples/s8_timestamp.csv")
                 .withColumn("time_ms", functions.col("time_ms").cast(DataTypes.LongType))
@@ -230,8 +232,10 @@ class SparkCertificationTrainingTest {
                 .withColumn("time_s_as_timestamp", functions.col("time_s").cast(DataTypes.TimestampType));
 
         String format = "yyyy-MM-dd";
-        Dataset<Row> df = dfIn.withColumn("date", functions.to_timestamp(functions.col("time_s")))
-                .withColumn("date_format", functions.date_format(functions.col("time_s_as_timestamp"), format));
+        Dataset<Row> df = dfIn
+                .withColumn("date", functions.to_timestamp(functions.col("time_s")))
+                .withColumn("date_format", functions.date_format(functions.col("time_s_as_timestamp"), format))
+                .withColumn("date_format_2", functions.from_unixtime(functions.col("time_s"), format));
         df.printSchema();
         df.show();
     }
