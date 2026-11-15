@@ -8,6 +8,7 @@ import io.zonky.test.db.postgres.embedded.FlywayPreparer;
 import io.zonky.test.db.postgres.junit5.EmbeddedPostgresExtension;
 import io.zonky.test.db.postgres.junit5.PreparedDbExtension;
 import org.apache.spark.sql.*;
+import org.apache.spark.sql.api.java.UDF1;
 import org.apache.spark.sql.types.DataTypes;
 import org.assertj.core.api.Assertions;
 import org.jspecify.annotations.Nullable;
@@ -127,26 +128,48 @@ class SparkPgTest {
     @Test
     void test_given_csv_should_be_transform_and_write_to_db_and_query_sql() {
         // given
-        String schema = "public";
-        String table = "table_countries";
-        Dataset<Row> df = sparkSession.read().option("header", true).csv("src/test/resources/samples/s1.csv");
+        Dataset<Row> dfIn = sparkSession.read().option("header", true).csv("src/test/resources/samples/s1.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+        dfIn.createOrReplaceTempView("df_in");
 
         // 1. order desc
-        Dataset<Row> df1 = df
-                .select(functions.col("population").cast(DataTypes.LongType))
-                .orderBy(functions.col("population").desc())
-                .selectExpr("population")
-                .limit(1);
-        long r1 = Long.parseLong(SparkCore.getColumnValue(df1, "population").toString());
-        Assertions.assertThat(r1).isEqualTo(200000L);
+        {
+            Dataset<Row> df = dfIn
+                    .orderBy(functions.col("population").desc())
+                    .selectExpr("population")
+                    .limit(1);
+            long r1 = Long.parseLong(SparkCore.getColumnValue(df, "population").toString());
+            Assertions.assertThat(r1).isEqualTo(200000L);
+        }
+
 
         // 2. count / approx
-        Dataset<Row> df2 = df
-                .select(functions.approx_count_distinct("id").as("_approx_count"),
-                        functions.count("id").as("_count"));
+        {
+            Dataset<Row> df2 = dfIn
+                    .select(functions.approx_count_distinct("id").as("_approx_count"),
+                            functions.count("id").as("_count"));
+        }
 
         // 3. udf
+        {
+            // https://spark.apache.org/docs/latest/sql-ref-functions.html
+            // https://spark.apache.org/docs/latest/sql-ref-functions-udf-scalar.html
+            UDF1<Integer, Integer> udf1 = x -> {
+                int base = 1000;
+                return x + base;
+            };
+            sparkSession.udf().register("udf_plus_x", udf1, DataTypes.IntegerType);
+            Dataset<Row> df = sparkSession.sql("SELECT udf_plus_x(5)");
+        }
 
+        // 4. udf with associated column
+        {
+            UDF1<Integer, Integer> udf1 = columnValue -> (int) (columnValue + Math.random());
+            sparkSession.udf().register("udf_column_plus_random", udf1, DataTypes.IntegerType);
+            //Dataset<Row> df = dfIn.selectExpr("select udf_column_plus_random(population) as random_population");
+            Dataset<Row> df = sparkSession.sql("select udf_column_plus_random(population) as random_population from df_in");
+            df.show();
+        }
 
     }
 
