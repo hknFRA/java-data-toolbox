@@ -224,6 +224,7 @@ class SparkCertificationTrainingTest {
         // date_format() -> timestamp to date string
         // from_unixtime() -> epoch second long to date string
         // to_timestamp() -> epoch second long to timestamp
+
         // show() on timestamp type human-readable string, but internally it's timestamp
 
         Dataset<Row> dfIn = spark.read().option("header", true).csv("src/test/resources/samples/s8_timestamp.csv")
