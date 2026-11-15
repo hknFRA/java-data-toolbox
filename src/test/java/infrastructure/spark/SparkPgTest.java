@@ -167,6 +167,7 @@ class SparkPgTest {
         {
             // udf must be invoked with spark.sql() api (not compatible with df.select())
             // udf can refer to a regular java object who is Serializable
+            // spark catalyst cannot optimize udf function
 
             Random random = new Random();
             UDF1<Long, Long> udf1 = columnValue -> columnValue + random.nextLong();
@@ -174,6 +175,12 @@ class SparkPgTest {
             //Dataset<Row> df = dfIn.selectExpr("select *, udf_column_plus_random(population) as random_population");
             Dataset<Row> df = sparkSession.sql("select *, udf_column_plus_random(population) as random_population from df_in");
             df.show();
+        }
+
+        // 5. drop
+        {
+            Dataset<Row> df = dfIn.drop("population", "pays", "ville");
+            Assertions.assertThat(df.columns()).hasSize(1);
         }
 
     }
