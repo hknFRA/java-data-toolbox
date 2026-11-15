@@ -12,14 +12,11 @@ import org.apache.spark.sql.api.java.UDF1;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
 import org.assertj.core.api.Assertions;
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.Random;
 
 class SparkCertificationTrainingTest {
@@ -34,7 +31,7 @@ class SparkCertificationTrainingTest {
     String id = secrets.id();
     String pass = "";
 
-    SparkSession sparkSession = SparkCore.getUnitTestSparkSession();
+    SparkSession spark = SparkCore.getUnitTestSparkSession();
 
     NamedParameterJdbcTemplate namedParameterJdbcTemplate = JdbcTemplateClients.getNamedParameterJdbcTemplate(url, id, pass, PgCore.ORG_POSTGRESQL_DRIVER);
 
@@ -44,22 +41,22 @@ class SparkCertificationTrainingTest {
     @Test
     void test_given_csv_should_be_transform_and_write_to_db_and_query_sql() {
         // given
-        Dataset<Row> dfIn = sparkSession.read().option("header", true).csv("src/test/resources/samples/s1.csv")
+        Dataset<Row> dfIn = spark.read().option("header", true).csv("src/test/resources/samples/s1.csv")
                 .withColumn("population", functions.col("population").cast(DataTypes.LongType));
         dfIn.createOrReplaceTempView("df_in");
         dfIn.cache();
 
-        Dataset<Row> dfInUnderscores = sparkSession.read().option("header", true).csv("src/test/resources/samples/s5_underscores.csv")
+        Dataset<Row> dfInUnderscores = spark.read().option("header", true).csv("src/test/resources/samples/s5_underscores.csv")
                 .withColumn("population", functions.col("population").cast(DataTypes.LongType))
                 .withColumn("is_valid", functions.col("is_valid").try_cast(DataTypes.BooleanType));
         dfInUnderscores.cache();
 
-        Dataset<Row> dfInUnderscoresDuplicates = sparkSession.read().option("header", true).csv("src/test/resources/samples/s5_underscores.csv")
+        Dataset<Row> dfInUnderscoresDuplicates = spark.read().option("header", true).csv("src/test/resources/samples/s5_underscores.csv")
                 .withColumn("population", functions.col("population").cast(DataTypes.LongType))
                 .withColumn("is_valid", functions.col("is_valid").try_cast(DataTypes.BooleanType));
         dfInUnderscoresDuplicates.cache();
 
-        Dataset<Row> dfInUnderscoresDuplicates3Columns = sparkSession.read().option("header", true).csv("src/test/resources/samples/s7_underscores_duplicates_on_4_columns.csv")
+        Dataset<Row> dfInUnderscoresDuplicates3Columns = spark.read().option("header", true).csv("src/test/resources/samples/s7_underscores_duplicates_on_4_columns.csv")
                 .withColumn("population", functions.col("population").cast(DataTypes.LongType))
                 .withColumn("is_valid", functions.col("is_valid").try_cast(DataTypes.BooleanType));
         dfInUnderscoresDuplicates3Columns.cache();
@@ -91,8 +88,8 @@ class SparkCertificationTrainingTest {
                 int base = 1000;
                 return x + base;
             };
-            sparkSession.udf().register("udf_plus_x", udf1, DataTypes.IntegerType);
-            Dataset<Row> df = sparkSession.sql("SELECT udf_plus_x(5)");
+            spark.udf().register("udf_plus_x", udf1, DataTypes.IntegerType);
+            Dataset<Row> df = spark.sql("SELECT udf_plus_x(5)");
         }
 
         // 4. udf with associated column
@@ -103,9 +100,9 @@ class SparkCertificationTrainingTest {
 
             Random random = new Random();
             UDF1<Long, Long> udf1 = columnValue -> columnValue + random.nextLong();
-            sparkSession.udf().register("udf_column_plus_random", udf1, DataTypes.LongType);
+            spark.udf().register("udf_column_plus_random", udf1, DataTypes.LongType);
             //Dataset<Row> df = dfIn.selectExpr("select *, udf_column_plus_random(population) as random_population");
-            Dataset<Row> df = sparkSession.sql("select *, udf_column_plus_random(population) as random_population from df_in");
+            Dataset<Row> df = spark.sql("select *, udf_column_plus_random(population) as random_population from df_in");
             df.show();
         }
 
@@ -178,11 +175,49 @@ class SparkCertificationTrainingTest {
             structType = structType.add("id", DataTypes.StringType, false);
             structType = structType.add("name", DataTypes.StringType, false);
             structType = structType.add("age", DataTypes.IntegerType, false);
-            Dataset<Row> df11 = sparkSession.createDataFrame(rows, structType);
+            Dataset<Row> df11 = spark.createDataFrame(rows, structType);
             df11.orderBy("age");
 
         }
 
+    }
+
+    @Test
+    void test_structure_schema_on_csv() {
+        // IMPORTANT
+        // struct type declare column in exact order
+        // if schema column number 3 is "is_capital_city", it will be mapped on csv column 3 even if it's not corresponding column
+
+        // IMPORTANT
+        // if schema define more columns than input csv, extra columns will be NULL
+
+        StructType structType = new StructType();
+        structType = structType.add("id", DataTypes.StringType, false);
+        structType = structType.add("pays", DataTypes.StringType, false);
+        structType = structType.add("is_capital_city", DataTypes.StringType, false);
+        Dataset<Row> dfIn = spark.read()
+                .schema(structType)
+                .option("header", true)
+                .csv("src/test/resources/samples/s1.csv");
+        dfIn.show();
+    }
+
+    @Test
+    void test_range_and_create_view() {
+        // range : inclusive -> exclusive
+
+        // createOrReplaceTempView
+        // https://stackoverflow.com/questions/42774187/spark-createorreplacetempview-vs-createglobaltempview
+        Dataset<Long> dfIn = spark.range(0, 10);
+        dfIn.createOrReplaceTempView("tmp_view");
+        Dataset<Long> dfRange = spark.range(1, 101);
+        dfRange.createOrReplaceTempView("tmp_view");
+        Assertions.assertThat(spark.sql("select * from tmp_view").count()).isEqualTo(100);
+
+        // createOrReplaceGlobalTempView
+        // global view will be put in default schema --> global_temp
+        dfRange.createOrReplaceGlobalTempView("view");
+        Assertions.assertThat(spark.sql("select * from global_temp.view").count()).isEqualTo(100);
     }
 
 }
