@@ -220,6 +220,16 @@ class SparkPgTest {
             Dataset<Row> df7 = dfInUnderscores
                     .withColumn("cleaned", functions.regexp_replace(functions.col("year_month_report"), regex, ""));
             df7.show();
+
+            // withColumnRenamed
+            Dataset<Row> df8 = dfIn
+                    .withColumnRenamed("population", "population_renamed");
+            df8.show();
+            Assertions.assertThat(df8.columns()).doesNotContain("population");
+
+            // na : return a NaFunction then trigger clean function (drop, fill) on df
+            Dataset<Row> df9 = dfInUnderscores.na().drop();
+            Assertions.assertThat(df9.count()).isEqualTo(2L);
         }
 
     }

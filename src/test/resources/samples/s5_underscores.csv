@@ -1,4 +1,4 @@
-id,pays,ville,population,year_month_report
-1,FRANCE,PARIS,100000,2025_01
-2,FRANCE,LYON,200000,2026_06
-3,FRANCE,MARSEILLE,30000,2020_01
+id,pays,ville,population,year_month_report,is_valid
+1,FRANCE,PARIS,100000,2025_01,true
+2,FRANCE,LYON,200000,2026_06,false
+3,FRANCE,MARSEILLE,30000,2020_01,
