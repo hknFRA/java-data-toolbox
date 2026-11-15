@@ -135,7 +135,8 @@ class SparkPgTest {
         dfIn.cache();
 
         Dataset<Row> dfInUnderscores = sparkSession.read().option("header", true).csv("src/test/resources/samples/s5_underscores.csv")
-                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType))
+                .withColumn("is_valid", functions.col("is_valid").try_cast(DataTypes.BooleanType));
         dfInUnderscores.cache();
 
 
@@ -230,6 +231,8 @@ class SparkPgTest {
             // na : return a NaFunction then trigger clean function (drop, fill) on df
             Dataset<Row> df9 = dfInUnderscores.na().drop();
             Assertions.assertThat(df9.count()).isEqualTo(2L);
+            Dataset<Row> df10 = dfInUnderscores.na().fill(false);
+            Assertions.assertThat(df10.filter("is_valid = false").count()).isEqualTo(2L);
         }
 
     }
