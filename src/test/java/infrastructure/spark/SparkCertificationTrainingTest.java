@@ -219,4 +219,21 @@ class SparkCertificationTrainingTest {
         Assertions.assertThat(spark.sql("select * from global_temp.view").count()).isEqualTo(100);
     }
 
+    @Test
+    void test_time_function() {
+        // date_format -> timestamp to date string
+        // to_timestamp -> epoch second long to timestamp
+
+        Dataset<Row> dfIn = spark.read().option("header", true).csv("src/test/resources/samples/s8_timestamp.csv")
+                .withColumn("time_ms", functions.col("time_ms").cast(DataTypes.LongType))
+                .withColumn("time_s", functions.col("time_ms").divide(1000).cast(DataTypes.LongType))
+                .withColumn("time_s_as_timestamp", functions.col("time_s").cast(DataTypes.TimestampType));
+
+        String format = "yyyy-MM-dd";
+        Dataset<Row> df = dfIn.withColumn("date", functions.to_timestamp(functions.col("time_s")))
+                .withColumn("date_format", functions.date_format(functions.col("time_s_as_timestamp"), format));
+        df.printSchema();
+        df.show();
+    }
+
 }
