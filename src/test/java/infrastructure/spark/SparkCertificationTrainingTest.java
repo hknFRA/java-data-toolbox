@@ -205,12 +205,11 @@ class SparkCertificationTrainingTest {
     @Test
     void test_range_and_create_view() {
         // range : inclusive -> exclusive
+        // implicit column 'id'
+        Dataset<Long> dfRange = spark.range(1, 101);
 
         // createOrReplaceTempView
         // https://stackoverflow.com/questions/42774187/spark-createorreplacetempview-vs-createglobaltempview
-        Dataset<Long> dfIn = spark.range(0, 10);
-        dfIn.createOrReplaceTempView("tmp_view");
-        Dataset<Long> dfRange = spark.range(1, 101);
         dfRange.createOrReplaceTempView("tmp_view");
         Assertions.assertThat(spark.sql("select * from tmp_view").count()).isEqualTo(100);
 
