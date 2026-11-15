@@ -139,6 +139,16 @@ class SparkPgTest {
                 .withColumn("is_valid", functions.col("is_valid").try_cast(DataTypes.BooleanType));
         dfInUnderscores.cache();
 
+        Dataset<Row> dfInUnderscoresDuplicates = sparkSession.read().option("header", true).csv("src/test/resources/samples/s5_underscores.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType))
+                .withColumn("is_valid", functions.col("is_valid").try_cast(DataTypes.BooleanType));
+        dfInUnderscoresDuplicates.cache();
+
+        Dataset<Row> dfInUnderscoresDuplicates3Columns = sparkSession.read().option("header", true).csv("src/test/resources/samples/s7_underscores_duplicates_on_4_columns.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType))
+                .withColumn("is_valid", functions.col("is_valid").try_cast(DataTypes.BooleanType));
+        dfInUnderscoresDuplicates3Columns.cache();
+
 
         // 1. order desc
         {
@@ -233,6 +243,13 @@ class SparkPgTest {
             Assertions.assertThat(df9.count()).isEqualTo(2L);
             Dataset<Row> df10 = dfInUnderscores.na().fill(false);
             Assertions.assertThat(df10.filter("is_valid = false").count()).isEqualTo(2L);
+
+            // dropDuplicates
+            // can be applied on subset
+            Assertions.assertThat(dfInUnderscoresDuplicates.distinct().count()).isEqualTo(3L);
+            Assertions.assertThat(dfInUnderscoresDuplicates.distinct().count()).isEqualTo(3L);
+            Assertions.assertThat(dfInUnderscoresDuplicates3Columns.dropDuplicates(new String[]{"id"}).count()).isEqualTo(3L);
+            Assertions.assertThat(dfInUnderscoresDuplicates3Columns.dropDuplicates(new String[]{"id", "pays", "ville", "population", "year_month_report", "is_valid"}).count()).isEqualTo(4L);
         }
 
     }
