@@ -209,6 +209,7 @@ class SparkPgTest {
             Dataset<Row> df4 = dfIn.withColumn("constant", functions.lit("CONSTANT"));
             df4.show();
 
+            // split() + element_at()
             // python : allow split(col("xxxx"), "_")[0] (0 based)
             // java : split + element_at(col("xxxx"), 1) (1 based)
             Dataset<Row> df5 = dfInUnderscores
