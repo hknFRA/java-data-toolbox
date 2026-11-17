@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -202,6 +203,64 @@ class SparkCertificationTrainingTest {
         dfIn.show();
     }
 
+    /// [1](https://spark.apache.org/docs/latest/sql-data-sources-csv.html)
+    /// [2](https://docs.databricks.com/aws/en/query/formats/csv?language=Scala#handle-malformed-csv-records)
+    ///
+    /// force lazy evaluation on csv data
+    /// count() : keep initial size of df
+    /// collectAsList() : force evaluation and with exact size
+    @Test
+    void test_read_csv() {
+        // todo : schema + FAILFAST
+
+        {
+            /// PERMISSIVE (default)
+            StructType structType = new StructType();
+            structType = structType.add("id", DataTypes.StringType, false);
+            structType = structType.add("pays", DataTypes.StringType, false);
+            Dataset<Row> dfIn = spark.read().schema(structType)
+                    .option("header", true).option("mode", "PERMISSIVE").csv("src/test/resources/samples/s9_two_columns.csv");
+            Assertions.assertThat(dfIn.count()).isEqualTo(3L);
+        }
+
+        {
+            /// FAILFAST (column OK)
+            StructType structType = new StructType();
+            structType = structType.add("id", DataTypes.StringType, false);
+            Dataset<Row> dfIn = spark.read().schema(structType)
+                    .option("header", true).option("mode", "FAILFAST").csv("src/test/resources/samples/s9_two_columns.csv");
+            Assertions.assertThat(dfIn.count()).isEqualTo(3L);
+        }
+
+        {
+            /// FAILFAST (1 column OK, 1 column KO)
+            StructType structType = new StructType();
+            structType = structType.add("id", DataTypes.StringType, false);
+            structType = structType.add("new_column", DataTypes.LongType, false);
+            Exception e = null;
+            try {
+                Dataset<Row> dfIn = spark.read().schema(structType)
+                        .option("header", true).option("mode", "FAILFAST").csv("src/test/resources/samples/s9_two_columns.csv");
+                dfIn.collect(); // lazy init eval
+            } catch (Exception eTmp) {
+                e = eTmp;
+            }
+            Assertions.assertThat(e).isNotNull();
+        }
+
+        {
+            /// DROPMALFORMED (1 column OK, 1 column KO bad type)
+            StructType structType = new StructType();
+            structType = structType.add("id", DataTypes.StringType, false);
+            structType = structType.add("ville", DataTypes.LongType, false);
+            Dataset<Row> dfIn = spark.read().schema(structType)
+                    .option("header", true).option("mode", "DROPMALFORMED").csv("src/test/resources/samples/s9_two_columns.csv");
+            Assertions.assertThat(dfIn.collectAsList().size()).isEqualTo(0);
+        }
+
+    }
+
+
     @Test
     void test_range_and_create_view() {
         // range : inclusive -> exclusive
@@ -240,5 +299,34 @@ class SparkCertificationTrainingTest {
         df.printSchema();
         df.show();
     }
+
+    @Test
+    void test_time_function_and_create_view() {
+        Dataset<Row> dfIn = spark.read().option("header", true).csv("src/test/resources/samples/s1.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+
+        dfIn.write().format("parquet");
+
+        //dfIn.withColumn("f1", functions.avg())
+        /* TODO
+        df.write.format("parquet") \
+    .sortBy("customer_id") \
+    .saveAsTable("sales.customers_sorted")
+         */
+
+    }
+
+    @Test
+    void test_repartition() {
+        // https://stackoverflow.com/questions/42171499/get-current-number-of-partitions-of-a-dataframe
+
+        Dataset<Long> dfIn = spark.range(0, 1000, 1, 6);
+        System.out.println(dfIn.rdd().getNumPartitions());
+
+        Dataset<Long> dfRepartition = dfIn.repartition(10);
+        System.out.println(dfRepartition.rdd().getNumPartitions());
+        System.out.println(Arrays.toString(dfRepartition.rdd().getPartitions()));
+    }
+
 
 }
