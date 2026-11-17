@@ -211,7 +211,6 @@ class SparkCertificationTrainingTest {
     /// collectAsList() : force evaluation and with exact size
     @Test
     void test_read_csv() {
-        // todo : schema + FAILFAST
 
         {
             /// PERMISSIVE (default)
@@ -233,7 +232,7 @@ class SparkCertificationTrainingTest {
         }
 
         {
-            /// FAILFAST (1 column OK, 1 column KO)
+            /// FAILFAST (1 column OK, 1 column KO not exists)
             StructType structType = new StructType();
             structType = structType.add("id", DataTypes.StringType, false);
             structType = structType.add("new_column", DataTypes.LongType, false);
