@@ -331,7 +331,7 @@ class SparkCertificationTrainingTest {
 
 
     @Test
-    void test_add_column_from_sql_query() {
+    void test_driver_collect_add_column_from_sql_query() {
         // prepare db
         Dataset<Row> df = spark.read().option("header", true).csv("src/test/resources/samples/s1.csv");
         SparkPg.write(df, secrets.url(), secrets.id(), pass, "public", "table_countries", SaveMode.Overwrite, 1000);
