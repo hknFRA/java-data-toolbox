@@ -12,13 +12,12 @@ import org.apache.spark.sql.api.java.UDF1;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
 import org.assertj.core.api.Assertions;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 class SparkCertificationTrainingTest {
 
@@ -315,16 +314,65 @@ class SparkCertificationTrainingTest {
 
     }
 
+    //@Test
+    //void test_repartition() {
+    //    // https://stackoverflow.com/questions/42171499/get-current-number-of-partitions-of-a-dataframe
+//
+    //    Dataset<Long> dfIn = spark.range(0, 1000, 1, 6);
+    //    System.out.println(dfIn.rdd().getNumPartitions());
+//
+    //    dfIn.mapPartitions(input -> {
+    //
+    //    })
+//
+    //    Dataset<Long> dfRepartition = dfIn.repartition(10);
+    //    System.out.println(dfRepartition.rdd().getNumPartitions());
+    //    System.out.println(Arrays.toString(dfRepartition.rdd().getPartitions()));
+    //}
+
+
     @Test
-    void test_repartition() {
-        // https://stackoverflow.com/questions/42171499/get-current-number-of-partitions-of-a-dataframe
+    void test_add_column_from_sql_query() {
+        // prepare db
+        Dataset<Row> df = spark.read().option("header", true).csv("src/test/resources/samples/s1.csv");
+        SparkPg.write(df, secrets.url(), secrets.id(), pass, "public", "table_countries", SaveMode.Overwrite, 1000);
 
-        Dataset<Long> dfIn = spark.range(0, 1000, 1, 6);
-        System.out.println(dfIn.rdd().getNumPartitions());
+        // given
+        Dataset<Row> dfIn = spark.read().option("header", true).csv("src/test/resources/samples/s9_two_columns.csv")
+                .withColumn("query", functions.concat(
+                        functions.lit("select pays, population from public.table_countries where id = '"), functions.lit(functions.col("id")), functions.lit("'"),
+                        functions.lit(" and ville = '"), functions.lit(functions.col("ville")), functions.lit("'")
+                ));
 
-        Dataset<Long> dfRepartition = dfIn.repartition(10);
-        System.out.println(dfRepartition.rdd().getNumPartitions());
-        System.out.println(Arrays.toString(dfRepartition.rdd().getPartitions()));
+        // when
+        dfIn.show(false);
+
+        Dataset<Row> dfTmp = dfIn.limit(1);
+        Row[] rows = dfIn.collectAsList().toArray(new Row[0]);
+        String[] columns = dfIn.columns();
+        StructType schema = df.schema();
+        List<Dataset<Row>> dfs = new ArrayList<>();
+        for (Row row : rows) {
+            //
+            for (String column : columns) {
+                dfTmp = dfTmp.withColumn(column, functions.lit(row.getAs(column)));
+            }
+
+            //
+            Map<String, @Nullable Object> map = namedParameterJdbcTemplate.getJdbcTemplate().queryForMap(row.getAs("query").toString());
+            for (String key : map.keySet()) {
+                Object value = map.get(key);
+                dfTmp = dfTmp.withColumn(key, functions.lit(value));
+            }
+
+            //
+            dfs.add(dfTmp);
+        }
+
+        // then
+        Dataset<Row> dfFinal = dfs.stream().reduce(Dataset::unionByName).orElseThrow();
+        dfFinal.show(false);
+
     }
 
 
