@@ -12,8 +12,6 @@ import org.apache.spark.sql.api.java.UDF1;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
 import org.assertj.core.api.Assertions;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -346,37 +344,11 @@ class SparkCertificationTrainingTest {
                 ));
 
         // when
-        dfIn.show(false);
-
-        Dataset<Row> dfFinal = getDfUpdatedWithJdbcCall(dfIn, df, namedParameterJdbcTemplate, "query");
-        dfFinal.show(false);
-
-    }
-
-    private @NonNull Dataset<Row> getDfUpdatedWithJdbcCall(Dataset<Row> dfIn, Dataset<Row> df, NamedParameterJdbcTemplate jdbc, String queryColumn) {
-        Dataset<Row> dfTmp = dfIn.limit(1);
-        Row[] rows = dfIn.collectAsList().toArray(new Row[0]);
-        String[] columns = dfIn.columns();
-        StructType schema = df.schema();
-        List<Dataset<Row>> dfs = new ArrayList<>();
-        for (Row row : rows) {
-            // prepare df tmp
-            for (String column : columns) {
-                dfTmp = dfTmp.withColumn(column, functions.lit(row.getAs(column)));
-            }
-
-            // update df tmp with new column
-            Map<String, @Nullable Object> map = jdbc.getJdbcTemplate().queryForMap(row.getAs(queryColumn).toString());
-            for (String key : map.keySet()) {
-                Object value = map.get(key);
-                dfTmp = dfTmp.withColumn(key, functions.lit(value));
-            }
-
-            dfs.add(dfTmp);
-        }
+        Dataset<Row> dfFinal = SparkPg.getDfUpdatedWithJdbcCall(dfIn, df, namedParameterJdbcTemplate, "query");
 
         // then
-        return dfs.stream().reduce(Dataset::unionByName).orElseThrow();
+        Assertions.assertThat(dfFinal.columns().length).isEqualTo(5);
+
     }
 
 

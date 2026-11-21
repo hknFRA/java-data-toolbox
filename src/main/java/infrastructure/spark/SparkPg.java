@@ -1,18 +1,17 @@
 package infrastructure.spark;
 
 import infrastructure.postgres.PgCore;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SaveMode;
-import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.*;
+import org.apache.spark.sql.types.StructType;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.postgresql.PGProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeMap;
+import java.util.*;
 
 import static tools.logger.MdcKeys.*;
 
@@ -20,6 +19,31 @@ public class SparkPg {
 
 
     private static final Logger log = LoggerFactory.getLogger(SparkPg.class);
+
+    static @NonNull Dataset<Row> getDfUpdatedWithJdbcCall(Dataset<Row> dfIn, Dataset<Row> df, NamedParameterJdbcTemplate jdbc, String queryColumn) {
+        Dataset<Row> dfTmp = dfIn.limit(1);
+        Row[] rows = dfIn.collectAsList().toArray(new Row[0]);
+        String[] columns = dfIn.columns();
+        List<Dataset<Row>> dfs = new ArrayList<>();
+        for (Row row : rows) {
+            // prepare df tmp
+            for (String column : columns) {
+                dfTmp = dfTmp.withColumn(column, functions.lit(row.getAs(column)));
+            }
+
+            // update df tmp with new column
+            Map<String, @Nullable Object> map = jdbc.getJdbcTemplate().queryForMap(row.getAs(queryColumn).toString());
+            for (String key : map.keySet()) {
+                Object value = map.get(key);
+                dfTmp = dfTmp.withColumn(key, functions.lit(value));
+            }
+
+            dfs.add(dfTmp);
+        }
+
+        // then
+        return dfs.stream().reduce(Dataset::unionByName).orElseThrow();
+    }
 
     public record Info(
             Dataset<Row> df,
