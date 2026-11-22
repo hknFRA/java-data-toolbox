@@ -348,8 +348,21 @@ class SparkCertificationTrainingTest {
 
         // then
         Assertions.assertThat(dfFinal.columns().length).isEqualTo(5);
-
     }
 
+    @Test
+    void test_create_dataframe() {
+        List<Row> rows = new ArrayList<>();
+        rows.add(RowFactory.create("1", "FRANCE"));
+        rows.add(RowFactory.create("2", "SPAIN"));
+
+        StructType structType = new StructType();
+        structType = structType.add("id", DataTypes.StringType, false);
+        structType = structType.add("country", DataTypes.StringType, false);
+
+        Dataset<Row> df = spark.createDataFrame(rows, structType);
+
+        Assertions.assertThat(df.count()).isEqualTo(2L);
+    }
 
 }
