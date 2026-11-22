@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import tools.logger.Slf4jWithLogback;
 
 import java.io.File;
 import java.util.*;
@@ -42,6 +43,12 @@ class SparkCertificationTrainingTest {
 
     @BeforeEach
     void beforeEach() {
+        Slf4jWithLogback.changeLevel(Map.of(
+                "org.apache.spark", "OFF",
+                "org.apache.parquet.hadoop", "OFF",
+                "org.apache.hadoop.mapreduce", "OFF",
+                "org.apache.parquet", "OFF"
+        ));
         FileUtils.deleteQuietly(new File("./work"));
     }
 
@@ -381,16 +388,43 @@ class SparkCertificationTrainingTest {
                 .withColumn("population", functions.col("population").cast(DataTypes.LongType));
         int count = (int) dfIn.count();
 
-        // when
-        dfIn.repartition(count)
-                .write().partitionBy("pays").mode(SaveMode.Overwrite).parquet("./work/");
+        {
+            // when (repartition with number)
+            Dataset<Row> dfRp = dfIn.repartition(count);
+            dfRp.withColumn("pid", functions.spark_partition_id()).show(false);
+            dfRp.write().partitionBy("pays").mode(SaveMode.Overwrite).parquet("./work/");
 
-        // then
-        Stream<File> files = FileUtils.listFilesAndDirs(new File("./work/"), null, null)
-                .stream().filter(file -> file.getPath().contains("pays"));
-        Assertions.assertThat(files).hasSize(2);
-        Collection<File> files2 = FileUtils.listFiles(new File("./work/"), new String[]{"parquet"}, true);
-        Assertions.assertThat(files2).hasSize(count);
+            // then
+            Stream<File> files = FileUtils.listFilesAndDirs(new File("./work/"), null, null)
+                    .stream().filter(file -> file.getPath().contains("pays"));
+            Assertions.assertThat(files).hasSize(2);
+            Collection<File> files2 = FileUtils.listFiles(new File("./work/"), new String[]{"parquet"}, true);
+            Assertions.assertThat(files2).hasSize(count);
+        }
+
+        {
+            // when (repartition with column)
+            Dataset<Row> dfRp = dfIn.repartition(2, functions.col("pays"));
+            dfRp.withColumn("pid", functions.spark_partition_id()).show(false);
+            /*
+            +---+------+---------+----------+---+
+            |id |pays  |ville    |population|pid|
+            +---+------+---------+----------+---+
+            |3  |SPAIN |MADRID   |1000      |0  |
+            |1  |FRANCE|PARIS    |100000    |1  |
+            |2  |FRANCE|LYON     |200000    |1  |
+            |3  |FRANCE|MARSEILLE|30000     |1  |
+            +---+------+---------+----------+---+
+             */
+            dfRp.write().partitionBy("pays").mode(SaveMode.Overwrite).parquet("./work/");
+
+            // then
+            Stream<File> files = FileUtils.listFilesAndDirs(new File("./work/"), null, null)
+                    .stream().filter(file -> file.getPath().contains("pays"));
+            Assertions.assertThat(files).hasSize(2);
+            Collection<File> files2 = FileUtils.listFiles(new File("./work/"), new String[]{"parquet"}, true);
+            Assertions.assertThat(files2).hasSize(2);
+        }
     }
 
 }

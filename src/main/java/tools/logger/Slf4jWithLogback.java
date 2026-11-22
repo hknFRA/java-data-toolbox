@@ -24,6 +24,7 @@ public class Slf4jWithLogback {
 
     private static final Logger LOG = LoggerFactory.getLogger(Slf4jWithLogback.class);
 
+    /// {@link Level}
     public static void changeLevel(Map<String, String> loggerLevelMap) {
         Map<String, Level> loggerLevelMapSafe = new TreeMap<>();
         loggerLevelMap.forEach((aLoggerName, aLoggerLevel) ->

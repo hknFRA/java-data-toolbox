@@ -15,6 +15,8 @@ import java.util.*;
 
 import static tools.logger.MdcKeys.*;
 
+///
+/// [data-source-option](https://spark.apache.org/docs/latest/sql-data-sources-jdbc.html?#data-source-option)
 public class SparkPg {
 
 
