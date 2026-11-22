@@ -36,6 +36,7 @@ bin/
 /local/
 src/test/out/
 src/test/java/local/
+/work
 
 # duckdb
 memory

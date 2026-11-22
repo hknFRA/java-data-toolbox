@@ -7,16 +7,20 @@ import infrastructure.postgres.PgCore;
 import io.zonky.test.db.postgres.embedded.FlywayPreparer;
 import io.zonky.test.db.postgres.junit5.EmbeddedPostgresExtension;
 import io.zonky.test.db.postgres.junit5.PreparedDbExtension;
+import org.apache.commons.io.FileUtils;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.api.java.UDF1;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import java.io.File;
 import java.util.*;
+import java.util.stream.Stream;
 
 class SparkCertificationTrainingTest {
 
@@ -35,6 +39,11 @@ class SparkCertificationTrainingTest {
     NamedParameterJdbcTemplate namedParameterJdbcTemplate = JdbcTemplateClients.getNamedParameterJdbcTemplate(url, id, pass, PgCore.ORG_POSTGRESQL_DRIVER);
 
     JavaDatasetSuiteBase javaDatasetSuiteBase = new JavaDatasetSuiteBase();
+
+    @BeforeEach
+    void beforeEach() {
+        FileUtils.deleteQuietly(new File("./work"));
+    }
 
 
     @Test
@@ -350,6 +359,38 @@ class SparkCertificationTrainingTest {
         Dataset<Row> df = spark.createDataFrame(rows, structType);
 
         Assertions.assertThat(df.count()).isEqualTo(2L);
+    }
+
+
+    @Test
+    void spark_repartition() {
+        Dataset<Row> dfIn = spark.read().option("header", true).csv("src/test/resources/samples/s1.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+        long count = dfIn.count();
+        Dataset<Row> dfInRepartition = dfIn.repartition((int) count);
+        dfInRepartition.write().mode(SaveMode.Overwrite).parquet("./work/");
+
+        Collection<File> files = FileUtils.listFiles(new File("./work/"), new String[]{"parquet"}, false);
+        Assertions.assertThat(files).hasSize((int) count);
+    }
+
+    @Test
+    void spark_repartition_partition_by() {
+        // given
+        Dataset<Row> dfIn = spark.read().option("header", true).csv("src/test/resources/samples/s10_france_spain.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+        int count = (int) dfIn.count();
+
+        // when
+        dfIn.repartition(count)
+                .write().partitionBy("pays").mode(SaveMode.Overwrite).parquet("./work/");
+
+        // then
+        Stream<File> files = FileUtils.listFilesAndDirs(new File("./work/"), null, null)
+                .stream().filter(file -> file.getPath().contains("pays"));
+        Assertions.assertThat(files).hasSize(2);
+        Collection<File> files2 = FileUtils.listFiles(new File("./work/"), new String[]{"parquet"}, true);
+        Assertions.assertThat(files2).hasSize(count);
     }
 
 }
