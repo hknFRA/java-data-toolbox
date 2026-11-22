@@ -164,19 +164,6 @@ class SparkCertificationTrainingTest {
             Assertions.assertThat(dfInUnderscoresDuplicates3Columns.dropDuplicates(new String[]{"id"}).count()).isEqualTo(3L);
             Assertions.assertThat(dfInUnderscoresDuplicates3Columns.dropDuplicates(new String[]{"id", "pays", "ville", "population", "year_month_report", "is_valid"}).count()).isEqualTo(4L);
 
-
-            // create dataframe
-            List<Row> rows = List.of(
-                    RowFactory.create("123", "hakan", 26),
-                    RowFactory.create("456", "hanim", 29)
-            );
-            StructType structType = new StructType();
-            structType = structType.add("id", DataTypes.StringType, false);
-            structType = structType.add("name", DataTypes.StringType, false);
-            structType = structType.add("age", DataTypes.IntegerType, false);
-            Dataset<Row> df11 = spark.createDataFrame(rows, structType);
-            df11.orderBy("age");
-
         }
 
     }
