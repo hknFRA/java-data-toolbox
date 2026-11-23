@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 class SparkCertificationTrainingTest {
 
+
     @RegisterExtension
     public static PreparedDbExtension db =
             EmbeddedPostgresExtension.preparedDatabase(
@@ -425,6 +426,38 @@ class SparkCertificationTrainingTest {
             Collection<File> files2 = FileUtils.listFiles(new File("./work/"), new String[]{"parquet"}, true);
             Assertions.assertThat(files2).hasSize(2);
         }
+    }
+
+
+    @Test
+    void test_create_dataset() {
+        // dataset (default column 'value')
+        List<Long> longs = List.of(123L, 456L, 789L);
+        Dataset<Long> dataset = spark.createDataset(longs, Encoders.LONG());
+        dataset.printSchema();
+        long max = (long) dataset.select(functions.max("value")).collectAsList().getFirst().get(0);
+        Assertions.assertThat(max).isEqualTo(789L);
+
+        // withColumn -> dataframe
+        Dataset<Row> rowDataset = dataset.withColumn("name", functions.lit("name"));
+        rowDataset.show();
+        rowDataset.printSchema();
+    }
+
+
+    @Test
+    void test_dataframe_group_by() {
+        // given
+        Dataset<Row> dfIn = spark.read().option("header", true).csv("src/test/resources/samples/s10_france_spain.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+
+        // default API (alias sur spark.functions)
+        Dataset<Row> df1 = dfIn.groupBy("pays").count();
+        // spark.functions API
+        Dataset<Row> df2 = dfIn.groupBy("pays").agg(functions.count("*").as("count"));
+
+        javaDatasetSuiteBase.assertDataFrameNoOrderEquals(df1, df2);
+
     }
 
 }
