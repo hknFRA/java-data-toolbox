@@ -8,6 +8,7 @@ import io.zonky.test.db.postgres.embedded.FlywayPreparer;
 import io.zonky.test.db.postgres.junit5.EmbeddedPostgresExtension;
 import io.zonky.test.db.postgres.junit5.PreparedDbExtension;
 import org.apache.commons.io.FileUtils;
+import org.apache.spark.api.java.function.ReduceFunction;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.api.java.UDF1;
 import org.apache.spark.sql.types.DataTypes;
@@ -458,6 +459,26 @@ class SparkCertificationTrainingTest {
 
         javaDatasetSuiteBase.assertDataFrameNoOrderEquals(df1, df2);
 
+    }
+
+    @Test
+    void test_dataframe_reduce() {
+        // reduce accumulative / associative operation
+        // use only if spark.functions not have needed function (better performance)
+
+        // given
+        Dataset<Row> dfIn = spark.read().option("header", true).csv("src/test/resources/samples/s10_france_spain.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+
+        // when
+        Row rowReduced = dfIn.reduce((ReduceFunction<Row>) (v1, v2) -> {
+            long v1l = v1.schema() == null ? (long) v1.get(0) : v1.getAs("population");
+            long v2l = v2.getAs("population");
+            return RowFactory.create(v1l + v2l);
+        });
+
+        // then
+        Assertions.assertThat(rowReduced.get(0)).isEqualTo(331000L);
     }
 
 }
