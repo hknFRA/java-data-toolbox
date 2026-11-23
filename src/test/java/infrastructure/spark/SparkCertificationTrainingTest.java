@@ -52,6 +52,8 @@ class SparkCertificationTrainingTest {
                 "org.apache.parquet", "OFF"
         ));
         FileUtils.deleteQuietly(new File("./work"));
+        Dataset<Row> df = spark.read().option("header", true).csv("src/test/resources/samples/s1.csv");
+        SparkPg.write(df, url, id, pass, "public", "table_countries", SaveMode.Overwrite, 10);
     }
 
 
@@ -504,6 +506,24 @@ class SparkCertificationTrainingTest {
                 "inner");
         join2.show();
         Assertions.assertThat(join2.count()).isEqualTo(3);
+    }
+
+    @Test
+    void test_explain() {
+        // given
+        Dataset<Row> df1 = spark.read().option("header", true).csv("src/test/resources/samples/s1.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+        Dataset<Row> df2 = df1.select(
+                functions.sum("population"),
+                functions.max("population"),
+                functions.min("population"));
+        Dataset<Row> df3 = SparkPg.readTable(spark, url, id, pass, "public", "table_countries").df();
+
+        // when
+        df2.explain(true);
+        df3.explain(true);
+        Dataset<Row> df4 = df2.unionByName(df3, true);
+        df4.explain(true);
     }
 
 }
