@@ -481,4 +481,29 @@ class SparkCertificationTrainingTest {
         Assertions.assertThat(rowReduced.get(0)).isEqualTo(331000L);
     }
 
+
+    @Test
+    void test_join() {
+        // given
+        Dataset<Row> df1 = spark.read().option("header", true).csv("src/test/resources/samples/s1.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+        Dataset<Row> df2 = spark.read().option("header", true).csv("src/test/resources/samples/s10_france_spain.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+
+        // programmatic
+        Dataset<Row> join = df1.join(df2,
+                df1.col("pays").equalTo(df2.col("pays"))
+                        .and(df1.col("ville").equalTo(df2.col("ville"))),
+                "inner");
+        join.show();
+        Assertions.assertThat(join.count()).isEqualTo(3);
+
+        // using : join columns are deduplicated
+        Dataset<Row> join2 = df1.join(df2,
+                new String[]{"pays", "ville"},
+                "inner");
+        join2.show();
+        Assertions.assertThat(join2.count()).isEqualTo(3);
+    }
+
 }
