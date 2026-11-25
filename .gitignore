@@ -46,3 +46,4 @@ memory.wal
 spark-warehouse
 hive-warehouse
 metastore_db
+derby.log
