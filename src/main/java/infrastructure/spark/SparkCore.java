@@ -19,6 +19,24 @@ public class SparkCore {
                 .getOrCreate();
     }
 
+    /// * warehouse (aka datastore)
+    /// contains data files
+    /// not use spark default 'spark-warehouse'
+    /// avoid conflicts with default values and in-memory catalog who use default spark-warehouse
+    ///
+    /// * metastore
+    /// contains data localization to tell where are data files to spark session
+    /// default : metastore_db
+    public static SparkSession getUnitTestSparkSessionWithHive() {
+        log.info("start unit test spark session with hive");
+        return SparkSession.builder()
+                .appName("unit-test-spark-session-hive")
+                .master("local[1]")
+                .enableHiveSupport()
+                .config("spark.sql.warehouse.dir", "./hive-warehouse")
+                .getOrCreate();
+    }
+
     public static Object getColumnValue(Dataset<Row> df, String columnName) {
         return df.selectExpr(columnName)
                 .limit(1)

@@ -41,3 +41,8 @@ src/test/java/local/
 # duckdb
 memory
 memory.wal
+
+# spark
+spark-warehouse
+hive-warehouse
+metastore_db

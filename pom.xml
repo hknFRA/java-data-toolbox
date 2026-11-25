@@ -131,6 +131,13 @@
             <version>${spark.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-hive_${scala.main.version}</artifactId>
+            <version>${spark.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Source: https://mvnrepository.com/artifact/com.crealytics/spark-excel -->
         <dependency>
             <groupId>com.crealytics</groupId>
