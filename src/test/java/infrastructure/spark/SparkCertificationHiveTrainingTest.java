@@ -9,7 +9,9 @@ import io.zonky.test.db.postgres.junit5.EmbeddedPostgresExtension;
 import io.zonky.test.db.postgres.junit5.PreparedDbExtension;
 import org.apache.commons.io.FileUtils;
 import org.apache.spark.sql.*;
+import org.apache.spark.sql.catalyst.analysis.NoSuchTableException;
 import org.apache.spark.sql.types.DataTypes;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -52,59 +54,33 @@ class SparkCertificationHiveTrainingTest {
     }
 
 
-    //@Test
-    //void test_spark_sql() throws NoSuchTableException {
-//
-    //    // given
-    //    Dataset<Row> df1 = spark.read().option("header", true).csv("src/test/resources/samples/s1.csv")
-    //            .withColumn("population", functions.col("population").cast(DataTypes.LongType));
-//
-    //    // when
-//
-    //    df1.write().saveAsTable();
-    //    df1.write().insertInto();
-    //    df1.writeTo();
-    //    Dataset<Row> table = spark.read().table("spark_schema.table_1");
-    //    table.show();
-    //}
-
-
-    //@Test
-    //void test_spark_write_bucketBy() {
-    //    spark.catalog().createTable
-    //}
-
     @Test
-    void test_spark_write_insertInto() {
-        // given
-        Dataset<Row> df1 = spark.read().option("header", true).csv("src/test/resources/samples/s1.csv")
-                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
-        String tableFqn = "my_table";
-
-        // when
-        df1.write().mode(SaveMode.Overwrite).saveAsTable(tableFqn);
-
-        Dataset<Row> table = spark.read().table(tableFqn);
-
-        System.out.println(spark.catalog().currentCatalog());
-        System.out.println(spark.catalog().currentDatabase());
-
-        df1.createOrReplaceTempView("tmp_view");
-        spark.catalog().listCatalogs().show(false);
-        spark.catalog().listDatabases().show(false);
-        spark.catalog().listTables().show(false);
-
-
-        //df1.write().insertInto();
-        //df1.writeTo();
-
-
+    void test_spark_write_insertInto() throws NoSuchTableException {
         // hierarchy : catalog.schema.table
         // native catalog.schemas
         // spark_schema.default
         // global_temp
 
-        table.show();
+        // given
+        Dataset<Row> df1 = spark.read().option("header", true).csv("src/test/resources/samples/s1.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+        String tableFqn = "my_table";
+        df1.write().mode(SaveMode.Overwrite).saveAsTable(tableFqn);
+        df1.createOrReplaceTempView("tmp_view");
+
+        // when
+        spark.catalog().listCatalogs().show(false);
+        spark.catalog().listDatabases().show(false);
+        spark.catalog().listTables().show(false);
+        // DataFrameWriterV1
+        df1.write().mode(SaveMode.Overwrite).saveAsTable(tableFqn);
+        df1.write().mode(SaveMode.Append).insertInto(tableFqn);
+        // DataFrameWriterV2
+        // df1.writeTo(tableFqn).append();
+
+        // then
+        Dataset<Row> df2 = spark.read().table(tableFqn);
+        Assertions.assertThat(df2.count()).isEqualTo(6L);
     }
 
 }

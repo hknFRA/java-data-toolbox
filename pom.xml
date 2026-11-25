@@ -479,6 +479,7 @@
                 <configuration>
                     <argLine>
                         --add-opens=java.base/java.io=ALL-UNNAMED
+                        --add-opens=java.base/java.net=ALL-UNNAMED
                     </argLine>
                     <environmentVariables>
                         <FLYWAY_NATIVE_CONNECTORS>true</FLYWAY_NATIVE_CONNECTORS>
