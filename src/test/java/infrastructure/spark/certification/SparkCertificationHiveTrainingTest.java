@@ -1,9 +1,11 @@
-package infrastructure.spark;
+package infrastructure.spark.certification;
 
 import com.holdenkarau.spark.testing.JavaDatasetSuiteBase;
 import infrastructure.jdbc.JdbcSecrets;
 import infrastructure.jdbc.JdbcTemplateClients;
 import infrastructure.postgres.PgCore;
+import infrastructure.spark.SparkCore;
+import infrastructure.spark.SparkPg;
 import io.zonky.test.db.postgres.embedded.FlywayPreparer;
 import io.zonky.test.db.postgres.junit5.EmbeddedPostgresExtension;
 import io.zonky.test.db.postgres.junit5.PreparedDbExtension;

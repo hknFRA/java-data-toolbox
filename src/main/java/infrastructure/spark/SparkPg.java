@@ -22,7 +22,7 @@ public class SparkPg {
 
     private static final Logger log = LoggerFactory.getLogger(SparkPg.class);
 
-    static @NonNull Dataset<Row> getDfUpdatedWithJdbcCall(Dataset<Row> dfIn, Dataset<Row> df, NamedParameterJdbcTemplate jdbc, String queryColumn) {
+    public static @NonNull Dataset<Row> getDfUpdatedWithJdbcCall(Dataset<Row> dfIn, Dataset<Row> df, NamedParameterJdbcTemplate jdbc, String queryColumn) {
         Dataset<Row> dfTmp = dfIn.limit(1);
         Row[] rows = dfIn.collectAsList().toArray(new Row[0]);
         String[] columns = dfIn.columns();
