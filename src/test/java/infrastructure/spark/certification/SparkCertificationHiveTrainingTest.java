@@ -85,4 +85,30 @@ class SparkCertificationHiveTrainingTest {
         Assertions.assertThat(df2.count()).isEqualTo(6L);
     }
 
+    @Test
+    void test_spark_write_bucket() throws NoSuchTableException {
+        // given
+        Dataset<Row> df1 = spark.read().option("header", true).csv("src/test/resources/samples/s11_france_spain_london_italy.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+
+        // when
+        df1.write().mode(SaveMode.Overwrite).bucketBy(1, "pays").sortBy("population").saveAsTable("table_bucket_pays");
+
+        // then
+
+    }
+
+    @Test
+    void test_spark_write_cluster() {
+        // given
+        Dataset<Row> df1 = spark.read().option("header", true).csv("src/test/resources/samples/s11_france_spain_london_italy.csv")
+                .withColumn("population", functions.col("population").cast(DataTypes.LongType));
+
+        // when
+        df1.write().mode(SaveMode.Overwrite).clusterBy("pays", "id").saveAsTable("table_bucket_pays");
+
+        // then
+
+    }
+
 }
